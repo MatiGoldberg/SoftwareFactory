@@ -1,0 +1,15 @@
+{
+  "name": "software-factory-doc",
+  "private": true,
+  "description": "Builds the assembled document (sections + diagrams) into a PDF",
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build-pdf.mjs"
+  },
+  "devDependencies": {
+    "@excalidraw/utils": "0.1.8",
+    "marked": "15.0.12",
+    "mermaid": "11.12.1",
+    "playwright": "1.63.0"
+  }
+}
