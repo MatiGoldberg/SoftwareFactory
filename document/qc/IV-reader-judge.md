@@ -1,0 +1,72 @@
+# Reader judge: Part IV (Enterprise complexity)
+
+Reader: a busy Microsoft engineering leader. Measured prose (excluding Mermaid and the requirements table): about 2,475 words, at the top of the 2,000 to 2,500 target. Both diagrams pass the validator (block 1: 672x647 shown, 13.7px text; block 2: 552x680, 16px text).
+
+## Owner's ask, point by point
+
+| Owner's words | Where answered | Concrete? |
+|---|---|---|
+| "microservices in different repos" | IV.1 | Yes: one change-set ID, order from the reverse dependency graph. |
+| "in different architectures" | IV.1, last sentence only | **Thin.** The only answer is "Standardize architectures where you can" plus a Spotify anecdote already in II.12. No mechanism for living with mixed .NET/Java/legacy. |
+| "different pipelines on different clusters" | IV.3 | Yes: the three-part pipeline contract (ring plan as data, verification API, halt signal) and per-pipeline federated identity. Non-AKS clusters (App Service) are left to the open gap, which is honest. |
+| "S2S trust/auth to overcome" | IV.4 | Yes, and the deepest subsection, but written for an identity engineer (see criterion 3 and edits 8 to 12). |
+| "owned by different teams" | IV.5 | Yes: three named humans, no cross-team action without approval, silence never auto-merges. One contradiction with II.6/II.12 (edit 14). |
+
+## Scores
+
+| Criterion | Score | Reason |
+|---|---|---|
+| 1. Clarity: deterministic vs agentic | 3 | The opening diagram and caption state clearly that the gates stay deterministic, but the subsections rarely say what an agent does here and at which rung; the reader asking "what do I agentify?" gets that answer only in IV.2 and IV.8, implicitly. |
+| 2. Reading flow | 4 | The Problem / What others did / Recommendation pattern reads well; IV.4 drops the pattern (no Problem line) just where the reader most needs orientation. |
+| 3. References explained before use | 3 | mabl, BeyondProd and SFI are introduced well; IV.4 uses blueprint, IdP, confidential client, resource server, audience, refresh token, step-up, `insufficient_scope`, SPIFFE/SPIRE and token subject without plain definitions; gVisor in IV.7 is unexplained. |
+| 4. Detail and length | 3 | About 40% of the "What others did" text repeats evidence Part II already gives, often verbatim (mabl graph, Azure breaking-change board, SDP config, Google LSC veto, Spotify framework). Cutting it frees room to fix IV.4 and still land near 2,100 words. |
+| 5. Message | 3 | The implied takeaway ("standardize the contract, not the tool; heterogeneity is safe if every repo, pipeline and cluster meets the same catalog, gate and identity contracts") is good, but it is said only inside IV.3 and never as the part's headline. |
+| 6. Diagrams | 4 | Both readable, sized well, orange agent node and legend consistent with II.9/II.2. Block 1 omits human owner approval and leaves the agent-to-teams edge unlabelled; block 2 shows only one of the two user-context branches the text recommends. |
+
+## Edits (in document order)
+
+1. **Intro, add the takeaway.** After "...which no stage covers in full." add: "The message of this part: heterogeneity is acceptable as long as every repo, pipeline and cluster meets the same three contracts: owners and dependencies from the service catalog, one set of deterministic gates, and identity from Entra with no stored secrets." (Matches the diagram; gives the reader the one line to remember.)
+
+2. **Diagram 1, show where humans approve and label the change path.** Change `AG --> T` to `AG -- "PRs" --> T`, and change the gates label to `G["Shared gates<br/>owner review, contract diff,<br/>merge queue, rings, watchdog"]`. Without owner review, the chart suggests agents' PRs pass only automated gates, which undercuts IV.5. Re-run the validator (width should stay below the WARN threshold; the label gains one short line).
+
+3. **Optional but recommended: replace the six "Stage detail:" lines with one table after the intro diagram** (table words do not count against prose). Columns: Complication | What stays deterministic | Agent role and highest rung (from Part II) | Stage detail. For example, IV.2 row: "Contract diff and human board | Drafts the non-breaking alternative: Prepare (L1) | II.3, II.4, II.7, II.9". This answers the reader's core question, "which parts do I agentify?", which the subsections otherwise leave implicit. The writer must copy rungs from the Part II tables, not invent them. Saves about 75 prose words.
+
+4. **IV.1 "What others did", cut repeated evidence (saves about 55 words).** Replace the whole paragraph with: "Microsoft runs both monorepos and multi-repo layouts, the latter often chosen by microservice teams [MS27], and Microsoft Digital's catalog links services to repos and owners (see V.1). One conference talk reports that Uber gives agents a "mega DevPod" holding all repos for cross-repo work [AIE2]. The repo coordination graph (mabl) and ownership sharding (Google) are covered in II.5, II.8 and II.6." Reason: the mabl 79-repo graph is already stated in II.4, II.5, II.6 and II.8; GOOG6 sharding in II.6, II.8 and II.12; MS28's 900+/3,800 figures in V.1.
+
+5. **IV.1, answer "different architectures" concretely.** Replace "Standardize architectures where you can: Spotify dropped one framework because of per-team variability [SPOT5]." (already in II.12) with: "**Recommendation:** do not wait for one architecture. The factory needs each component, whatever its language or host, to expose the same three things: an AGENTS.md with its build and test commands (template: D3), the shared verification API (see IV.3), and a schema diff for each contract type it publishes (see II.4). Retire variants that cannot meet these; Spotify dropped one framework for this reason [SPOT5]." This is the owner's second complication and currently gets one sentence.
+
+6. **IV.2 "What others did", collapse to what is new (saves about 60 words).** Replace the paragraph with: "Part II covers Azure's breaking-change gate (azure-openapi-diff plus the Breaking Change Review Board, see II.4) and Amazon's two-phase Prepare and Activate rollouts (see II.9). Azure's stated next step is validating live traffic against the API definition [MS25]." In the recommendation, name the rung: "...they draft the non-breaking alternative the board would otherwise propose (Prepare, L1)."
+
+7. **IV.3 "What others did", cut sentences repeated from II.9, II.7 and II.8 (saves about 70 words).** Delete "Azure sets rollout policy centrally, with mandatory health signals and centrally set bake times, so policies rather than developers set rollout speed [MS2]." and "Microsoft guidance asks for the same deployment tooling in every environment [MS1], and"; delete the Fleet sentence ("For clusters, AKS Fleet Manager stages ... all members failed." [MS21]) and replace with "AKS Fleet stages cluster updates (see II.9) but covers only AKS."; shorten the Spotify clause to "Spotify hides heterogeneous CI behind one verification service [SPOT7]." Keep MS28 (main-only), MS17 and AWS1, which are new. Keep MS1/MS2 as sources in the REQ-PIPE-01 row.
+
+8. **IV.4, add a plain-language Problem line and the three rules up front.** Replace "An agent is a new kind of caller inside a mesh of services that already call each other." with: "**Problem.** Services in an older estate often trust each other through stored secrets, keys or network location. An agent given one of those holds every right the secret carries, for as long as it lives, with no record of which human asked. **Recommendation:** the same three rules for services and agents: every caller proves who it is with a short-lived token from Entra, never a stored secret; every token is addressed to one service and works nowhere else; and the requesting human's identity travels with every call." This is the single biggest clarity gain for a non-identity reader; everything after it becomes the detail behind one of the three rules.
+
+9. **IV.4 managed identity bullet, cut specialist detail (saves about 25 words).** Delete "Use one user-assigned identity per group of resources doing the same task, or system-assigned identities where per-resource audit matters, and" so the sentence starts "**Managed identity** for workloads on Azure: "always grant the least permissions needed" [MS16]." Keep the two cautions; they are the most useful plain-English lines in the section.
+
+10. **IV.4 federation bullet, define IdP and cut Uber.** Change "exchanges its own IdP token" to "exchanges the token its own platform issues (GitHub, the Kubernetes cluster, another cloud)". Delete "One conference talk reports that Uber's model gateway uses SPIRE workload identity and attributes every request to a user, project and team [AIE2]." (talk-grade, and Uber reappears two paragraphs later). If SPIFFE/SPIRE stays in the list, gloss it: "SPIFFE/SPIRE (an open standard for workload identity)". Saves about 25 words.
+
+11. **IV.4 "The agent's own identity", replace protocol mechanics with what a leader needs (saves about 60 words).** Replace the paragraph from "In the on-behalf-of (OBO) flow..." to "API keys bypass it entirely [MS24]." with: "In the on-behalf-of (OBO) flow, Entra trades the developer's token for a new token that is addressed to one tool and still names the developer, so the tool sees both who asked and which agent acted [MS22]. No password is involved: the agent's blueprint (the template its identity is created from) proves itself with a managed identity, and background work continues on refresh tokens, not stored secrets [MS22]. An agent can pass the user's authority on to another agent or API the same way [MS23]. Conditional Access, Entra's sign-in policy engine, runs every time a token is issued or refreshed, and one policy can cover a whole class of agents [MS24]. API keys bypass it entirely [MS24], which is why REQ-IDN-01 bans them." (Grounding: same claims as the current text, fewer protocol terms; the grounding reviewer should confirm wording against MS22 to MS24.)
+
+12. **IV.4 MCP paragraph, define "audience" and drop the HTTP detail.** After "clients name the target with the `resource` parameter," add the gloss: "a token's audience is the one service it is valid for, so a token stolen from the CI tool server is useless at the cluster tool server." Replace "and a 403 `insufficient_scope` challenge drives step-up to the scopes one operation needs [MCP1]" with "and a server can demand extra permission for one high-impact operation at the moment it is needed (step-up) [MCP1]".
+
+13. **IV.4 "User context across hops", make the decision readable, and align diagram 2.** Rewrite the recommendation as two bullets: "- The service must enforce the user's own rights (customer data, a production change): chain OBO, so the user stays the person named in the token. - Otherwise: the tool server calls with its own managed identity and attaches the requester and agent IDs as signed context for audit." Then extend the diagram 2 caption: "The chart shows the second case; where Service A must enforce the user's rights, the tool server uses OBO instead of its managed identity."
+
+14. **IV.5, fix a contradiction with II.6 and II.12.** The recommendation says "An agent working for team A never acts on team B's service without B's approval", and REQ-OWN-02 repeats it. II.6 REQ-OWN-01 and II.12 REQ-OWN-01 allow a global approver for mechanical patterns, and II.6 REQ-REV-06 allows auto-merge for a promoted class; GOOG6, quoted in this very subsection, says local owners "don't hold a veto". Change to: "...without approval from B, or from the global approver an approved campaign names (see II.12)." Mirror it in REQ-OWN-02.
+
+15. **IV.5 "What others did", cut repeats (saves about 50 words).** Delete the Google sentence (in II.12 verbatim; keep only if edit 14 needs it, as the citation for the campaign exception), "Spotify's owning teams tested and merged the agent's PRs themselves [SPOT5], and" (II.6, II.1), and "Atlassian's vendor-reported Agent Context Controls set which agents operate where [ATL1]." (II.1). Keep MS28, MS27 and SPOT6.
+
+16. **IV.6 "What others did", replace with a pointer (saves about 55 words).** The MS2, MS20 and AWS1 sentences repeat II.9's "Config is code" bullet, and the META4 line is framing only. Replace the paragraph with: "Part II already sends config and flags through the same rings as code (see II.9, II.10) [MS2, AWS1]. What is new is the agents' own configuration." Keep the recommendation unchanged; it is the subsection's real contribution.
+
+17. **IV.7, cut two lines and gloss one term (saves about 25 words).** Delete "Catalog metadata decides which compliance scans apply to each service [MS28]." (II.1, II.2, V.1) and "One conference talk reports an AI guard in Uber's model gateway [AIE2]." (vague, talk-grade). Change "isolates less-trusted code in gVisor" to "isolates less-trusted code in a sandbox (gVisor)". Delete the inline "[GAP: no source measures prompt-injection defenses for engineering agents.]" since Open gaps already lists it.
+
+18. **IV.8, trim repeats (saves about 30 words).** Delete the inline "[GAP: no Microsoft source publishes factory cost or review-capacity data.]" (in Open gaps). Shorten "Spotify reports "we now have 76% more PRs to review." and responds by auto-merging what is safe [SPOT2]; it reached..." to "Spotify's 76% rise in PRs to review (see II.6) followed 1,000 merged PRs in 10 days [SPOT2, SPOT7]" (check this combination against the notes; if the two figures are not causally linked in the sources, keep them as separate clauses). Delete "Booking.com found "hours saved" too weak a measure (one conference talk) [AIE5]." (in II.6 and III).
+
+19. **Open gaps, remove items owned elsewhere (saves about 30 words).** Delete "No source describes cross-team prioritization when owners disagree." (II.1 owns it) and shorten the first bullet to "Non-REST contract gates and consumer-driven contract testing (see II.4)."
+
+## Length check
+
+Edits 3, 4, 6, 7, 9, 10, 11, 12, 15 to 19 cut about 560 words; edits 1, 5, 8 and 13 add about 160. Net result is about 2,075 words of prose, comfortably inside the 2,000 to 2,500 target, with the space moved from repeated Part II evidence into IV.4 clarity and the architecture answer.
+
+## Verdict
+
+**READY AFTER EDITS.** Coverage of the owner's ask is good and the requirements are genuinely new. Must-do edits: 1, 5, 8, 11, 14, and the repetition cuts 4, 6, 7, 16.

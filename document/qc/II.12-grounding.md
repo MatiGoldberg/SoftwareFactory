@@ -1,0 +1,22 @@
+# II.12 grounding QC
+
+Reviewed against 01-conventions.md, references.md and the source notes for every cited code (GOOG2, GOOG6, SPOT1, SPOT2, SPOT3, SPOT4, SPOT5, SPOT7, ABNB1, AWS2, MS3, MS7, MS21, MS25, MS26, MS31, AIE5, AIE7, AIE9, AIE15). All codes map to the right source IDs. Numbers and quotes checked: every number matches its note and every quote is verbatim. No em-dashes. Both Mermaid blocks pass the validator with no WARN (14.5px and 16.0px text). Template headings are present and in order; rung names are exact; REQ areas (REPO, OWN, VER, CTX, MRG, GOV, DEP) are all on the conventions list; L4 is marked as a proposal, consistent with the stated ceiling; chart and table role names match.
+
+| Location | Issue | Severity | Fix |
+|---|---|---|---|
+| Ideal process, Decommissioning gate | MS26 (grade C, a guideline document) is written as Azure practice: "Azure signals deprecation in-band with an `azure-deprecating` header". MS3 (grade C) and MS26 are not described as guidance-level sources in words. | med | "Azure's REST API guidelines recommend signalling deprecation in-band with an `azure-deprecating` header..."; keep "Well-Architected guidance" wording for MS3. |
+| Ideal process, Decommissioning gate | MS25 says three years is typical for *breaking changes to GA* (with notice), not a general GA support window. | low | "and, when a GA version must break, typically gives three years to migrate [MS25]". |
+| Agentify table, Migration agent L3 row | Cites [SPOT2] for "allow-listed mechanical class merge once every deterministic gate passes". SPOT2 only says Spotify auto-merges "what's safe"; the class allow-list and gate are our synthesis, so the citation implies more than the source says. | med | "Spotify auto-merges what is safe [SPOT2]; Recommendation: limit this to allow-listed classes decided by the class and risk gate." |
+| Agentify table, Migration agent L2 row | [ABNB1] cited for "Opens sharded PRs ... owner's merge is the approval". The Airbnb note supports per-file validation and retries, not sharded PRs or owner merges. | low | Move ABNB1 to the retry clause only: "retries on verifier errors [ABNB1]"; keep SPOT5 for owner merge. |
+| REQ-VER-01 | "Diffs that delete or disable tests or change toolchain versions outside scope are blocked" is our synthesis (Spotify used an LLM judge, later removed). Allowed in a requirements table, but Source column credits only SPOT4, SPOT7. | low | Source: "SPOT4, SPOT7; Recommendation for the block rule". |
+| Real-world reference | Four paragraphs and four systems (Microsoft, Google, Spotify, Airbnb plus Amazon), heavy with numbers; conventions ask for a 3 to 5 sentence explainer of one or two systems. Prose is about 1,150 words against a 700 to 1,000 target. | med | Keep Google and Spotify as the explainer; move Airbnb and Amazon numbers into one sentence or into Enterprise complications (long tail already uses Airbnb). Trim to under 1,000 words. |
+| Enterprise complications, "Unknown owners at decommission" | MS31 says Microsoft IT "reduced" 233 resources; section says "removed". Also the "Scream Test" was Microsoft IT, and the pilot was the Commerce Financial Platforms team. | low | "a Commerce Financial Platforms pilot reduced 233 resources across 36 subscriptions, saving more than $15,000 a month [MS31]". |
+| Real-world reference, Microsoft | "Microsoft's 1ES delegates toil ..." The note attributes toil delegation to Microsoft generally (post by the 1ES lead); the 80 to 90% figure is "as stated", from linked posts. | low | "Microsoft (1ES's Customer Zero post) reports ..."; optionally "as stated" to keep it soft. |
+| Agentify table, Discovery/impact agent L0; Enterprise complications | Declared vs observed dependencies and owner lookup are catalog topics; V.1 is cited once in gates but not here. | low | Add "(see V.1)" to the L0 row and the "Unknown owners" bullet. |
+| Enterprise complications, Heterogeneous builds | MS21 (grade C, Microsoft Learn product doc) is used for a capability, which is acceptable; no fix strictly needed. | low | Optional: none. |
+
+## Verdict
+
+**PASS WITH FIXES.** No high-severity issues: all citations map correctly, numbers and quotes match the notes, talks are labelled as talks, AWS2 is flagged as self-reported, and synthesis is labelled. Fix the three medium items (MS26/MS3 weak-source wording, SPOT2 over-attribution in the L3 row, Real-world reference length and overall word count).
+
+Counts: high 0, med 3, low 7.

@@ -1,0 +1,653 @@
+{
+ "MS-SDP-LEARN": {
+  "code": "MS1",
+  "url": "https://learn.microsoft.com/devops/operate/safe-deployment-practices",
+  "grade": "C",
+  "title": "Safe deployment practices",
+  "pub": "Microsoft Learn, 2022"
+ },
+ "MS-SDP-BLOG": {
+  "code": "MS2",
+  "url": "https://azure.microsoft.com/en-us/blog/advancing-safe-deployment-practices/",
+  "grade": "B",
+  "title": "Advancing safe deployment practices",
+  "pub": "Azure Blog (Russinovich), 2020"
+ },
+ "MS-WAF-SDP": {
+  "code": "MS3",
+  "url": "https://learn.microsoft.com/azure/well-architected/operational-excellence/safe-deployments",
+  "grade": "C",
+  "title": "Architecture strategies for safe deployment (WAF OE:11)",
+  "pub": "Microsoft Learn, 2026"
+ },
+ "MS-GANDALF-BLOG": {
+  "code": "MS4",
+  "url": "https://azure.microsoft.com/en-us/blog/advancing-safe-deployment-with-aiops-introducing-gandalf/",
+  "grade": "B",
+  "title": "Advancing safe deployment with AIOps: Gandalf",
+  "pub": "Azure Blog, 2021"
+ },
+ "MS-GANDALF-NSDI": {
+  "code": "MS5",
+  "url": "https://www.usenix.org/conference/nsdi20/presentation/li",
+  "grade": "A",
+  "title": "Gandalf: analytics service for safe deployment",
+  "pub": "USENIX NSDI '20"
+ },
+ "MS-AICR": {
+  "code": "MS6",
+  "url": "https://devblogs.microsoft.com/engineering-at-microsoft/enhancing-code-quality-at-scale-with-ai-powered-code-reviews/",
+  "grade": "B",
+  "title": "Enhancing code quality at scale with AI-powered code reviews",
+  "pub": "Engineering@Microsoft, 2025"
+ },
+ "MS-AGENTIC-PLATFORM": {
+  "code": "MS7",
+  "url": "https://developer.microsoft.com/blog/learn-from-microsoft-transform-software-development-through-an-agentic-platform/",
+  "grade": "B",
+  "title": "Learn from Microsoft: transform software development through an agentic platform (1ES, Customer Zero)",
+  "pub": "Microsoft for Developers, 2026"
+ },
+ "MS-CCA-DOTNET": {
+  "code": "MS8",
+  "url": "https://devblogs.microsoft.com/dotnet/ten-months-with-cca-in-dotnet-runtime/",
+  "grade": "A-",
+  "title": "Ten months with Copilot Coding Agent in dotnet/runtime",
+  "pub": ".NET Blog (Toub), 2026"
+ },
+ "GH-APPLIEDSCI": {
+  "code": "GH1",
+  "url": "https://github.blog/ai-and-ml/github-copilot/agent-driven-development-in-copilot-applied-science/",
+  "grade": "C",
+  "title": "Agent-driven development in Copilot Applied Science",
+  "pub": "GitHub Blog, 2026"
+ },
+ "MS-SRE-BUILD": {
+  "code": "MS9",
+  "url": "https://techcommunity.microsoft.com/blog/appsonazureblog/how-we-build-and-use-azure-sre-agent-with-agentic-workflows/4508753",
+  "grade": "B",
+  "title": "How we build and use Azure SRE Agent with agentic workflows",
+  "pub": "Microsoft Tech Community, 2026"
+ },
+ "MS-SRE-GA": {
+  "code": "MS10",
+  "url": "https://techcommunity.microsoft.com/blog/AppsonAzureBlog/announcing-general-availability-for-the-azure-sre-agent/4500682",
+  "grade": "C",
+  "title": "Announcing GA for Azure SRE Agent",
+  "pub": "Microsoft Tech Community, 2026"
+ },
+ "MS-RCACOPILOT": {
+  "code": "MS11",
+  "url": "https://arxiv.org/abs/2305.15778",
+  "grade": "A",
+  "title": "Automatic RCA via LLMs for cloud incidents (RCACopilot)",
+  "pub": "Microsoft / EuroSys '24"
+ },
+ "MS-ENTRA-AGENTID": {
+  "code": "MS12",
+  "url": "https://learn.microsoft.com/en-us/entra/agent-id/what-are-agent-identities",
+  "grade": "C",
+  "title": "What are agent identities? (Entra Agent ID)",
+  "pub": "Microsoft Learn, 2025\u201326"
+ },
+ "MS-SPEC": {
+  "code": "MS13",
+  "url": "https://developer.microsoft.com/blog/spec-driven-development-spec-kit/",
+  "grade": "C",
+  "title": "Spec-driven development with GitHub Spec Kit",
+  "pub": "Microsoft for Developers, 2025"
+ },
+ "GH-AGENTIC": {
+  "code": "GH2",
+  "url": "https://github.blog/ai-and-ml/github-copilot/beyond-code-generation-a-developers-guide-to-agentic-engineering/",
+  "grade": "C",
+  "title": "Beyond code generation: a developer's guide to agentic engineering",
+  "pub": "GitHub Blog, 2026-11"
+ },
+ "MS-IT-ADO": {
+  "code": "MS14",
+  "url": "https://www.microsoft.com/insidetrack/blog/reclaiming-engineering-time-with-ai-in-azure-devops-at-microsoft/",
+  "grade": "C",
+  "title": "Reclaiming engineering time with AI in Azure DevOps",
+  "pub": "Microsoft Inside Track, 2026"
+ },
+ "MS-IT-AINATIVE": {
+  "code": "MS15",
+  "url": "https://www.microsoft.com/insidetrack/blog/powering-the-new-age-of-ai-led-engineering-in-it-at-microsoft/",
+  "grade": "C",
+  "title": "Powering the new age of AI-led engineering in IT",
+  "pub": "Microsoft Inside Track, 2026"
+ },
+ "MS-MI-BESTPRACTICE": {
+  "code": "MS16",
+  "url": "https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/managed-identity-best-practice-recommendations",
+  "grade": "C",
+  "title": "Best practice recommendations for managed identities",
+  "pub": "Microsoft Learn, 2025\u201326"
+ },
+ "MS-WIF": {
+  "code": "MS17",
+  "url": "https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation",
+  "grade": "C",
+  "title": "Workload identity federation",
+  "pub": "Microsoft Learn, 2025\u201326"
+ },
+ "MS-IT-SECURE-AGENTS": {
+  "code": "MS18",
+  "url": "https://www.microsoft.com/insidetrack/blog/securing-ai-agents-in-the-enterprise-learnings-from-our-journey-at-microsoft/",
+  "grade": "B",
+  "title": "Securing AI agents in the enterprise: learnings from our journey",
+  "pub": "Microsoft Inside Track, 2026"
+ },
+ "MS-SFI": {
+  "code": "MS19",
+  "url": "https://learn.microsoft.com/en-us/security/zero-trust/sfi/secure-future-initiative-overview",
+  "grade": "C",
+  "title": "Secure Future Initiative overview (pillar 4: protect engineering systems)",
+  "pub": "Microsoft Learn, 2026"
+ },
+ "MS-WIN-RESILIENCY": {
+  "code": "MS20",
+  "url": "https://blogs.windows.com/windowsexperience/2024/09/12/taking-steps-that-drive-resiliency-and-security-for-windows-customers/",
+  "grade": "C",
+  "title": "Taking steps that drive resiliency and security for Windows customers (post-CrowdStrike SDP)",
+  "pub": "Windows Blog, 2024"
+ },
+ "MS-AKS-FLEET": {
+  "code": "MS21",
+  "url": "https://learn.microsoft.com/azure/kubernetes-fleet/concepts-update-orchestration",
+  "grade": "C",
+  "title": "AKS Fleet Manager: staged updates across multiple clusters",
+  "pub": "Microsoft Learn, 2026"
+ },
+ "MS-ENTRA-AGENT-OBO": {
+  "code": "MS22",
+  "url": "https://learn.microsoft.com/en-us/entra/agent-id/agent-on-behalf-of-oauth-flow",
+  "grade": "C",
+  "title": "Entra Agent ID: on-behalf-of flow for agents",
+  "pub": "Microsoft Learn, 2025\u201326"
+ },
+ "MS-ENTRA-AGENT-PROTOCOLS": {
+  "code": "MS23",
+  "url": "https://learn.microsoft.com/entra/agent-id/agent-oauth-protocols",
+  "grade": "C",
+  "title": "Entra Agent ID: authentication protocols (delegated, autonomous, agent user)",
+  "pub": "Microsoft Learn, 2026"
+ },
+ "MS-CA-AGENTS": {
+  "code": "MS24",
+  "url": "https://learn.microsoft.com/entra/identity/conditional-access/agent-id",
+  "grade": "C",
+  "title": "Conditional Access for agents",
+  "pub": "Microsoft Learn, 2026"
+ },
+ "MS-AZURE-BREAKING-CHANGES": {
+  "code": "MS25",
+  "url": "https://devblogs.microsoft.com/azure-sdk/azure-approach-to-versioning-and-avoiding-breaking-changes/",
+  "grade": "B",
+  "title": "Azure's approach to versioning and avoiding breaking changes",
+  "pub": "Azure SDK Blog, 2023"
+ },
+ "MS-API-GUIDELINES": {
+  "code": "MS26",
+  "url": "https://github.com/microsoft/api-guidelines/blob/vNext/azure/ConsiderationsForServiceDesign.md",
+  "grade": "C",
+  "title": "Azure REST API guidelines: considerations for service design",
+  "pub": "Microsoft (GitHub), 2024"
+ },
+ "MS-HOW-MSFT-DEVOPS": {
+  "code": "MS27",
+  "url": "https://learn.microsoft.com/devops/develop/how-microsoft-develops-devops",
+  "grade": "B",
+  "title": "How Microsoft develops with DevOps (release flow, rings, repo strategy)",
+  "pub": "Microsoft Learn, 2022"
+ },
+ "MS-IT-COMPLIANT-ENG": {
+  "code": "MS28",
+  "url": "https://www.microsoft.com/insidetrack/blog/enabling-secure-and-compliant-engineering-with-azure-devops/",
+  "grade": "B",
+  "title": "Enabling secure and compliant engineering with Azure DevOps (service catalog drives compliance)",
+  "pub": "Microsoft Inside Track, 2020"
+ },
+ "AIE-MSFT-SUBAGENTS": {
+  "code": "AIE1",
+  "url": "https://ai.engineer/talks/DxP5aW4VknQ-your-sub-agents-are-distributed-system-treat",
+  "grade": "B",
+  "title": "Your sub-agents are a distributed system (SAFE handoffs)",
+  "pub": "AI Engineer talk, Microsoft engineer"
+ },
+ "MS-AZ-SERVICE-GROUPS": {
+  "code": "MS29",
+  "url": "https://learn.microsoft.com/en-us/azure/governance/service-groups/overview",
+  "grade": "C",
+  "title": "What are Azure Service Groups? (cross-subscription service grouping, preview)",
+  "pub": "Microsoft Learn, 2025\u201326"
+ },
+ "MS-ARG-CHANGES": {
+  "code": "MS30",
+  "url": "https://learn.microsoft.com/en-us/azure/governance/resource-graph/how-to/get-resource-changes",
+  "grade": "C",
+  "title": "Get resource changes (Azure Resource Graph change analysis)",
+  "pub": "Microsoft Learn, 2024\u201326"
+ },
+ "MS-IT-SCREAM-TEST": {
+  "code": "MS31",
+  "url": "https://www.microsoft.com/insidetrack/blog/moving-from-a-scream-test-to-holistic-lifecycle-management-how-we-manage-our-azure-services-at-microsoft/",
+  "grade": "B",
+  "title": "From \"Scream Test\" to lifecycle management (ARG \u2192 Service 360 action items)",
+  "pub": "Microsoft Inside Track, 2025"
+ },
+ "GH-SERVICEOWNERS": {
+  "code": "GH3",
+  "url": "https://github.blog/engineering/how-we-organize-and-get-things-done-with-serviceowners/",
+  "grade": "C",
+  "title": "How we organize and get things done with SERVICEOWNERS",
+  "pub": "GitHub Blog, 2023"
+ },
+ "AN-TEAMS": {
+  "code": "AN1",
+  "url": "https://claude.com/resources/articles/how-anthropic-teams-use-claude-code",
+  "grade": "C",
+  "title": "How Anthropic teams use Claude Code",
+  "pub": "2025"
+ },
+ "AN-HARNESS-1": {
+  "code": "AN2",
+  "url": "https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents",
+  "grade": "B",
+  "title": "Effective harnesses for long-running agents",
+  "pub": "2025"
+ },
+ "AN-HARNESS-2": {
+  "code": "AN3",
+  "url": "https://www.anthropic.com/engineering/harness-design-long-running-apps",
+  "grade": "B",
+  "title": "Harness design for long-running application development",
+  "pub": "2026"
+ },
+ "AN-WORK": {
+  "code": "AN4",
+  "url": "https://www.anthropic.com/research/how-ai-is-transforming-work-at-anthropic",
+  "grade": "A-",
+  "title": "How AI is transforming work at Anthropic (survey + 200K transcripts)",
+  "pub": "2025"
+ },
+ "AN-BESTPRACTICES": {
+  "code": "AN5",
+  "url": "https://code.claude.com/docs/en/best-practices",
+  "grade": "C",
+  "title": "Best practices for Claude Code",
+  "pub": "current"
+ },
+ "AN-AGENTS": {
+  "code": "AN6",
+  "url": "https://www.anthropic.com/research/building-effective-agents",
+  "grade": "C",
+  "title": "Building effective agents",
+  "pub": "2024"
+ },
+ "OAI-HARNESS": {
+  "code": "OAI1",
+  "url": "https://openai.com/index/harness-engineering/",
+  "grade": "B",
+  "title": "Harness engineering: leveraging Codex in an agent-first world",
+  "pub": "2026"
+ },
+ "OAI-CODEX-USE": {
+  "code": "OAI2",
+  "url": "https://openai.com/business/guides-and-resources/how-openai-uses-codex/",
+  "grade": "C",
+  "title": "How OpenAI uses Codex",
+  "pub": "n.d."
+ },
+ "GOOG-AISE": {
+  "code": "GOOG1",
+  "url": "https://research.google/blog/ai-in-software-engineering-at-google-progress-and-the-path-ahead/",
+  "grade": "B",
+  "title": "AI in software engineering at Google: progress and the path ahead",
+  "pub": "2024"
+ },
+ "GOOG-MIGRATIONS": {
+  "code": "GOOG2",
+  "url": "https://arxiv.org/abs/2501.06972",
+  "grade": "B+",
+  "title": "How is Google using AI for internal code migrations? (full text)",
+  "pub": "2025"
+ },
+ "DORA-2025": {
+  "code": "GOOG3",
+  "url": "https://blog.google/innovation-and-ai/technology/developers-tools/dora-report-2025/",
+  "grade": "A",
+  "title": "2025 DORA State of AI-assisted Software Development (blog summary)",
+  "pub": "2025"
+ },
+ "DORA-AICM": {
+  "code": "GOOG4",
+  "url": "https://cloud.google.com/blog/products/ai-machine-learning/introducing-doras-inaugural-ai-capabilities-model",
+  "grade": "A",
+  "title": "DORA AI Capabilities Model (7 capabilities)",
+  "pub": "2025"
+ },
+ "GOOG-SRE-CANARY": {
+  "code": "GOOG5",
+  "url": "https://sre.google/workbook/canarying-releases/",
+  "grade": "B",
+  "title": "Canarying Releases (SRE Workbook)",
+  "pub": "2018"
+ },
+ "GOOG-LSC": {
+  "code": "GOOG6",
+  "url": "https://abseil.io/resources/swe-book/html/ch22.html",
+  "grade": "B",
+  "title": "Large-Scale Changes (Software Engineering at Google, ch. 22)",
+  "pub": "2020"
+ },
+ "GOOG-OWNERS": {
+  "code": "GOOG8",
+  "url": "https://abseil.io/resources/swe-book/html/ch09.html",
+  "grade": "B",
+  "title": "Code Review: OWNERS files (Software Engineering at Google, ch. 9)",
+  "pub": "2020"
+ },
+ "META-ACH": {
+  "code": "META1",
+  "url": "https://arxiv.org/abs/2501.12862",
+  "grade": "A",
+  "title": "Mutation-guided LLM-based test generation at Meta",
+  "pub": "FSE '25"
+ },
+ "META-DRS": {
+  "code": "META2",
+  "url": "https://engineering.fb.com/2025/08/06/developer-tools/diff-risk-score-drs-ai-risk-aware-software-development-meta/",
+  "grade": "B",
+  "title": "Diff Risk Score: AI-driven risk-aware software development",
+  "pub": "2025"
+ },
+ "STRIPE-MINIONS": {
+  "code": "STRIPE1",
+  "url": "https://stripe.dev/blog/minions-stripes-one-shot-end-to-end-coding-agents",
+  "grade": "B",
+  "title": "Minions: Stripe's one-shot, end-to-end coding agents (Parts 1\u20132)",
+  "pub": "2026"
+ },
+ "SPOTIFY-HONK-1": {
+  "code": "SPOT1",
+  "url": "https://engineering.atspotify.com/2025/11/spotifys-background-coding-agent-part-1",
+  "grade": "B",
+  "title": "1,500+ PRs later: Spotify's background coding agent (Honk, Part 1)",
+  "pub": "2025"
+ },
+ "SPOTIFY-CONSTRAINT": {
+  "code": "SPOT2",
+  "url": "https://engineering.atspotify.com/2026/6/code-with-claude-coding-is-no-longer-the-constraint",
+  "grade": "B",
+  "title": "Coding is no longer the constraint (Code with Claude 2026)",
+  "pub": "2026"
+ },
+ "AWS-HANDSOFF": {
+  "code": "AWS1",
+  "url": "https://aws.amazon.com/builders-library/automating-safe-hands-off-deployments/",
+  "grade": "B",
+  "title": "Automating safe, hands-off deployments (Builders' Library)",
+  "pub": "2020"
+ },
+ "META-RELEASE-RISK": {
+  "code": "META3",
+  "url": "https://arxiv.org/html/2410.06351v1",
+  "grade": "A",
+  "title": "Moving faster and reducing risk: using LLMs in release deployment",
+  "pub": "Meta, 2024"
+ },
+ "META-CONFIG-SAFETY": {
+  "code": "META4",
+  "url": "https://engineering.fb.com/2026/04/08/security/trust-but-canary-configuration-safety-at-scale-meta-tech-podcast/",
+  "grade": "C",
+  "title": "Trust but canary: configuration safety at scale (podcast page)",
+  "pub": "Meta, 2026"
+ },
+ "SPOTIFY-HONK-2": {
+  "code": "SPOT3",
+  "url": "https://engineering.atspotify.com/2025/11/context-engineering-background-coding-agents-part-2",
+  "grade": "B",
+  "title": "Background coding agents: context engineering (Honk 2)",
+  "pub": "2025"
+ },
+ "SPOTIFY-HONK-3": {
+  "code": "SPOT4",
+  "url": "https://engineering.atspotify.com/2025/12/feedback-loops-background-coding-agents-part-3",
+  "grade": "B",
+  "title": "Background coding agents: strong feedback loops (Honk 3)",
+  "pub": "2025"
+ },
+ "SPOTIFY-HONK-4": {
+  "code": "SPOT5",
+  "url": "https://engineering.atspotify.com/2026/4/background-coding-agents-dataset-migrations-honk-part-4",
+  "grade": "B",
+  "title": "Background coding agents: downstream dataset migrations across owning teams (Honk 4)",
+  "pub": "2026"
+ },
+ "SPOTIFY-ANTHROPIC-LIVE": {
+  "code": "SPOT6",
+  "url": "https://engineering.atspotify.com/2026/4/anthropic-agentic-development",
+  "grade": "C",
+  "title": "Let's talk agentic development: Spotify x Anthropic live",
+  "pub": "2026"
+ },
+ "SPOTIFY-BACKSTAGE-CATALOG": {
+  "code": "SPOT8",
+  "url": "https://backstage.io/docs/features/software-catalog/",
+  "grade": "C",
+  "title": "Backstage Software Catalog overview (catalog-as-code)",
+  "pub": "current / 2020"
+ },
+ "SPOTIFY-BACKSTAGE-DESCRIPTOR": {
+  "code": "SPOT9",
+  "url": "https://backstage.io/docs/features/software-catalog/descriptor-format/",
+  "grade": "C",
+  "title": "Backstage descriptor format (owners, dependsOn/dependencyOf, APIs)",
+  "pub": "current"
+ },
+ "SPOTIFY-BACKSTAGE-INGESTION": {
+  "code": "SPOT10",
+  "url": "https://backstage.io/docs/features/software-catalog/external-integrations/",
+  "grade": "C",
+  "title": "Backstage entity providers, processing, orphaning (Life of an Entity)",
+  "pub": "current"
+ },
+ "SHOPIFY-PLAYBOOK": {
+  "code": "SHOP1",
+  "url": "https://www.bvp.com/atlas/inside-shopifys-ai-first-engineering-playbook",
+  "grade": "C",
+  "title": "Inside Shopify's AI-first engineering playbook",
+  "pub": "BVP interview with Shopify's Head of Eng, 2026"
+ },
+ "UBER-UREVIEW": {
+  "code": "UBER1",
+  "url": "https://www.uber.com/en-US/blog/ureview/",
+  "grade": "B",
+  "title": "uReview: scalable, trustworthy GenAI for code review",
+  "pub": "Uber Engineering, 2025"
+ },
+ "UBER-AISTACK": {
+  "code": "UBER2",
+  "url": "https://newsletter.pragmaticengineer.com/p/how-uber-uses-ai-for-development",
+  "grade": "B",
+  "title": "How Uber uses AI for development (partly paywalled)",
+  "pub": "Pragmatic Engineer, 2026"
+ },
+ "AIRBNB-MIGRATION": {
+  "code": "ABNB1",
+  "url": "https://medium.com/airbnb-engineering/accelerating-large-scale-test-migration-with-llms-9565c208023b",
+  "grade": "B",
+  "title": "Accelerating large-scale test migration with LLMs",
+  "pub": "Airbnb Tech Blog, 2025"
+ },
+ "AMAZON-Q-JAVA": {
+  "code": "AWS2",
+  "url": "https://simonwillison.net/2024/Aug/24/andy-jassy-amazon-ceo/",
+  "grade": "C",
+  "title": "Amazon Q Java upgrades: 4,500 developer-years (Jassy quote)",
+  "pub": "2024"
+ },
+ "SPOTIFY-QCON-2026": {
+  "code": "SPOT7",
+  "url": "https://www.infoq.com/news/2026/03/spotify-honk-rewrite",
+  "grade": "B",
+  "title": "Rewriting all of Spotify's code base, all the time",
+  "pub": "InfoQ / QCon London, 2026"
+ },
+ "EMBEDDED-AIFIRST-ROADMAP": {
+  "code": "EMB1",
+  "url": "https://arxiv.org/abs/2609.30863",
+  "grade": "B",
+  "title": "Developing a roadmap to an AI-first organization (embedded-software company)",
+  "pub": "Gothenburg/Chalmers, arXiv 2026"
+ },
+ "GOOG-BEYONDPROD": {
+  "code": "GOOG7",
+  "url": "https://docs.cloud.google.com/docs/security/beyondprod",
+  "grade": "B",
+  "title": "BeyondProd: zero trust between microservices",
+  "pub": "Google Cloud, 2019/2026"
+ },
+ "MCP-AUTHZ": {
+  "code": "MCP1",
+  "url": "https://modelcontextprotocol.io/specification/draft/basic/authorization",
+  "grade": "C",
+  "title": "MCP authorization spec (OAuth 2.1, audience-bound tokens)",
+  "pub": "MCP project, draft"
+ },
+ "AWS-ROLLBACK-SAFETY": {
+  "code": "AWS3",
+  "url": "https://aws.amazon.com/builders-library/ensuring-rollback-safety-during-deployments/",
+  "grade": "B",
+  "title": "Ensuring rollback safety during deployments (two-phase deploys)",
+  "pub": "Amazon Builders' Library, 2019"
+ },
+ "ATLASSIAN-AGENT-LOOPS": {
+  "code": "ATL1",
+  "url": "https://www.atlassian.com/blog/jira/governed-agent-loops",
+  "grade": "C",
+  "title": "Governed agent loops for the AI-native SDLC",
+  "pub": "Atlassian, 2026"
+ },
+ "MABL-75-REPOS": {
+  "code": "MABL1",
+  "url": "https://www.mabl.com/blog/how-we-built-a-system-for-ai-agents-to-ship-real-code-across-75-repos",
+  "grade": "C",
+  "title": "AI agents shipping code across 75+ repos (vendor, 25 engineers)",
+  "pub": "mabl, 2026"
+ },
+ "NETFLIX-SERVICE-TOPOLOGY": {
+  "code": "NFLX1",
+  "url": "https://www.infoq.com/news/2026/06/netflix-microservices-realtime/",
+  "grade": "B",
+  "title": "Netflix real-time Service Topology from eBPF flows, IPC metrics, traces (via InfoQ)",
+  "pub": "InfoQ on Netflix TechBlog, 2026"
+ },
+ "AIE-UBER-SDLC": {
+  "code": "AIE2",
+  "url": "https://ai.engineer/talks/17-YSUHo6Lk-agentic-sdlc-at-uber-building-blocks-ubers",
+  "grade": "talk",
+  "title": "Agentic SDLC at Uber: building blocks for Uber's software factory",
+  "pub": "Uber"
+ },
+ "AIE-UBER-MERGE": {
+  "code": "AIE3",
+  "url": "https://ai.engineer/talks/hX140a5klW0-ai-writes-code-faster-than-uber-merge",
+  "grade": "talk",
+  "title": "AI writes code faster than Uber can merge it",
+  "pub": "Uber"
+ },
+ "AIE-META-ONCALL": {
+  "code": "AIE4",
+  "url": "https://ai.engineer/talks/_NBx2NNOuA4-give-your-on-call-its-own-ai",
+  "grade": "talk",
+  "title": "Give your on-call its own AI teammate (per-action autonomy)",
+  "pub": "Meta"
+ },
+ "AIE-BOOKING-ROI": {
+  "code": "AIE5",
+  "url": "https://ai.engineer/talks/UXOLprPvr-0-building-ai-agents-real-roi-in-enterprise",
+  "grade": "talk",
+  "title": "Building AI agents with real ROI in the enterprise SDLC",
+  "pub": "Booking.com, Sourcegraph"
+ },
+ "AIE-DUOLINGO-TESTS": {
+  "code": "AIE6",
+  "url": "https://ai.engineer/talks/D_4Rn6uLdQM-225-000-lines-tests-written-merged",
+  "grade": "talk",
+  "title": "225,000 lines of tests, written and merged by agents",
+  "pub": "Duolingo"
+ },
+ "AIE-MAERSK-MAINTAIN": {
+  "code": "AIE7",
+  "url": "https://ai.engineer/talks/oeknLUsN_GE-agents-made-code-free-maintaining-it-didnt",
+  "grade": "talk",
+  "title": "Agents made code free; maintaining it didn't get cheaper",
+  "pub": "Maersk"
+ },
+ "AIE-AGENT-READY": {
+  "code": "AIE8",
+  "url": "https://ai.engineer/talks/ShuJ_CN6zr4-making-codebases-agent-ready",
+  "grade": "talk",
+  "title": "Making codebases agent-ready (eight verification pillars)",
+  "pub": "Factory"
+ },
+ "AIE-LEGACY-BENCH": {
+  "code": "AIE9",
+  "url": "https://ai.engineer/talks/7vn4WpqNpck-benchmarking-coding-agents-on-new-vs-legacy",
+  "grade": "talk",
+  "title": "Benchmarking coding agents on new vs legacy codebases",
+  "pub": "Wisedocs"
+ },
+ "AIE-MULTIPLAYER-FACTORY": {
+  "code": "AIE10",
+  "url": "https://ai.engineer/talks/fTUinMqA1XQ-your-teams-agents-are-all-shipping-same",
+  "grade": "talk",
+  "title": "Your team's agents are all shipping to the same code at once",
+  "pub": "Tessl"
+ },
+ "AIE-LINEAR-CONTEXT": {
+  "code": "AIE11",
+  "url": "https://ai.engineer/talks/Xw9utONfhIY-what-your-coding-agent-cant-see",
+  "grade": "talk",
+  "title": "What your coding agent can't see in the code",
+  "pub": "Linear"
+ },
+ "AIE-MERGE-BOTTLENECK": {
+  "code": "AIE12",
+  "url": "https://ai.engineer/talks/TlOAhw9t5DA-merge-is-bottleneck",
+  "grade": "talk",
+  "title": "Merge is the bottleneck",
+  "pub": "Vorflux"
+ },
+ "AIE-PROVE-TESTS": {
+  "code": "AIE13",
+  "url": "https://ai.engineer/talks/gbeuC0ud1p4-your-pr-says-tests-passed-prove-it",
+  "grade": "talk",
+  "title": "Your PR says the tests passed. Prove it.",
+  "pub": "Neo4j"
+ },
+ "AIE-ALWAYS-ON-OPS": {
+  "code": "AIE14",
+  "url": "https://ai.engineer/talks/vSx5IULvBns-always-on-agents-run-production-without-on",
+  "grade": "talk",
+  "title": "Always-on agents run production without the on-call tax",
+  "pub": "Resolve AI"
+ },
+ "AIE-AGENT-ARCHAEOLOGY": {
+  "code": "AIE15",
+  "url": "https://ai.engineer/talks/Enn9dVrRXAo-stop-doing-agent-archaeology-on-your-teams",
+  "grade": "talk",
+  "title": "Stop doing agent archaeology on your team's code",
+  "pub": "Delta/Zed"
+ },
+ "EXT-DEPUTYDEV": {
+  "code": "EXT1",
+  "url": "https://arxiv.org/abs/2509.19708",
+  "grade": "B",
+  "title": "Intuition to Evidence: measuring AI's true impact on developer productivity (300 engineers, 1 year)",
+  "pub": ""
+ }
+}

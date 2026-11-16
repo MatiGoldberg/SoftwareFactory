@@ -1,0 +1,52 @@
+# II.11 reader judge (Monitoring, incidents, learning loop)
+
+Reader: a busy Microsoft engineering leader who knows engineering basics but not Azure SRE Agent, RCACopilot, Meta's on-call agent talk, Google's canary chapter or GitHub's SERVICEOWNERS. Bar: approved II.9 and II.2.
+
+Prose length: about 1,060 words excluding tables and diagrams, just above the 700 to 1,000 target (inside +20%, but the owner's "too long" feedback applies; edits below cut about 120 words). Validator: both blocks OK (block 1: natural 721x707, shown 672x659, text 14.9px, close to the 700px height limit; block 2: 459x591, text 16px). No WARN.
+
+## Scores
+
+| # | Criterion | Score | Reason |
+|---|---|---|---|
+| 1 | Clarity: deterministic core and rungs | 4 | The deterministic list, the stated ceiling (L3 for a few reversible single-service runbook actions) and the L4 "Future proposal" row are clear and consistent; but the postmortem agent's L3 row bypasses the "Owner approves" gate shown in chart 2, and the same "On-call/SRE agent" gets a second full ladder with different L3 guardrails from II.9's. |
+| 2 | Reading flow | 4 | Purpose, chart, references, agents, complications flow well; "How trust is earned", "Realistic ceiling" and "The learning loop" paragraphs sit between the recommendation and the chart, so the chart arrives late; the last complication bullet joins two unrelated points. |
+| 3 | References explained before use | 3 | Azure SRE Agent, RCACopilot and Meta's agent are explained well. Unexplained or unclear: "GitHub's incident commanders reportedly do this [GH3]" (GH3 is the SERVICEOWNERS post, never named), the AIE14 quote (Resolve AI talk, speaker unnamed), "absolute SLO checks" and "SLIs", "replayed past incidents" (replay never defined). |
+| 4 | Detail and length | 3 | ~6% over target; repetition between the gate bullets, "How trust is earned", the L3 row and REQ-OBS-03/04; marginal citations (AIE14, Linear, CrowdStrike). Overlap with II.9: Azure SRE Agent explained twice and the SRE agent's ladder duplicated almost row for row. Missing: who declares "impact ended". |
+| 5 | Message | 4 | "The SRE agent investigates from the first page and earns Act, then notify one runbook action at a time; humans own severity, command and closure" lands, and the learning loop is a clear second point. Slightly diluted by citing Azure's automated responses as the basis for an L3 ceiling the Gap says is unproven. |
+| 6 | Diagrams | 4 | Both readable at column width, orange agent nodes plus legend, consistent with II.9/II.2. Chart 1 includes "Watchdog no-go" (a rollout cause, which the Purpose sends to II.9) and has no II.9 exit; chart 2 omits the Prepare/L2 path and the postmortem agent's L2/L3 actions, and its IC -> Postmortem agent edge is unlabelled. Chart 1 is at 659px of the 700px limit, so additions must be compact. |
+
+## Concrete edits
+
+1. **Fix the postmortem agent's L3 against chart 2 (rung consistency).** Chart 2 routes every repair item through `LOOP(["Owner approves:<br/>II.1, II.7, alerts, context"])`, but the L3 row "Files repair intake items in II.1 without waiting, then notifies" skips the owner. Either mark the row "Future proposal: files repair intake items ..." (the stated ceiling paragraph only covers SRE runbook actions, so this row has no ceiling) or add to chart 2 a dotted edge `PMA -. "Act, then notify:<br/>intake item" .-> INTAKE(["II.1 intake gate"])` and change the guardrail to "Lands only if II.1's dedupe and priority gate passes; the agent does not set priority". Recommended: the second, plus one sentence after the ceiling paragraph: "For the postmortem agent, the ceiling is Act, then notify for filing intake items, which II.1's gate still decides."
+2. **Reconcile the SRE agent with II.9 (overlap).** Add one line before the table: "This is the same on-call/SRE agent as in II.9. II.9's ladder covers rollout mitigations (halt, roll back to LKG, flag off); this table covers runbook actions when no rollout is the cause." Then harmonise L3 guardrails: II.9 says "Only these reversible actions, one service at a time"; II.11 says "Per-action allowlist (D6), rate limit, kill switch". Use the II.11 wording in both or state "as II.9, plus rate limit and kill switch". Also compress the L2 and L4 rows, which repeat II.9 nearly verbatim ("Low override rate, no wrong-target actions"; "fix-forward ... through the normal pipeline") to "As II.9".
+3. **Remove "Watchdog no-go" from chart 1's Detect row.** A watchdog no-go always blames a rollout, which the Purpose sends to II.9. Replace `A2["Watchdog no-go"]` with `A2["Usage drop"]` (matches "usage metrics to catch silent failures [MS3]"), and show the hand-off compactly: `TR(["Triage: severity,<br/>rollout cause to II.9"])`. Keep height under 700px (now 659px).
+4. **Do not overclaim the L3 basis.** "Realistic ceiling today: Act, then notify for a few reversible, single-service runbook actions, as Azure's guardrailed automated responses allow [MS10] (Meta is more conservative [AIE4]). Higher is a future proposal." -> "**Realistic ceiling today:** Act, then notify for a few reversible, single-service runbook actions. Azure SRE Agent offers guardrailed automated responses [MS10], but its posts do not say which ran unapproved, and Meta keeps production mitigations human [AIE4], so this ceiling is our proposal. Higher rungs are future proposals." This also removes the tension with the Gap in the reference paragraph.
+5. **Explain GH3.** "GitHub's incident commanders reportedly do this [GH3]." -> "At GitHub, a SERVICEOWNERS file maps each service to its owning team, and incident commanders reportedly use it to find whom to page [GH3]."
+6. **Define replay once.** At its first use ("agreement with humans on replayed past incidents") add: "(replay: run the agent on past incidents and compare its choice with what on-call actually did)".
+7. **Cut the AIE14 quote.** Delete ": "The expensive part of operational work is understanding a changing environment, as well as executing the task." [AIE14]". The speaker is unexplained, the quote is awkward, and the sentence before it already makes the point. Saves ~20 words.
+8. **Cut the third learning-loop example.** Delete "; Linear distills review comments into agent instructions, warning that instruction files keep growing [AIE11]". Keep the "periodic pruning" in REQ-CTX-01 with AIE11 as its source. One strong example (Uber) suffices.
+9. **Split or cut the last complication bullet.** "Partners and alert noise." joins two unrelated points. Delete the CrowdStrike sentence (it is about security-partner coordination, not this stage's mechanism) and move "Ecolab reportedly cut daily alerts from 30 to 40 to under 10 (vendor customer story) [MS10]" into the Azure SRE Agent reference paragraph, or cut it.
+10. **Merge the trust paragraphs.** "How trust is earned per action" restates the L3 row and REQ-OBS-03/04. Shorten to: "**Recommendation:** each runbook action has its own rung in the agent action policy (template: D6) and its own trust-ledger record (template: D7). Meta's three criteria set each ceiling [AIE4]: a single-service scale-out can reach Act, then notify; a failover that moves load onto other teams stays at Act on approval." The evidence list and demotion rule already sit in the table and REQ-OBS-04.
+11. **Say who declares the end of impact.** Chart edge `"impact ended"` has no owner. In the Mitigate bullet add: "Impact ends when the SLIs are back within SLO; the incident commander confirms it." This keeps closure human, as the one-line recommendation promises.
+12. **Make severity ownership consistent.** "A published rule sets severity" vs the recommendation "humans own severity". Change the recommendation to "a published rule sets severity and humans can raise it; humans own incident command and closure", and add "the agent never lowers severity" to the SRE agent's Advise guardrail.
+13. **Gloss the SLO terms.** "Paging alerts fire on user-visible SLIs against SLO targets, not host counters, as Google recommends with absolute SLO checks [GOOG5]" -> "Paging alerts fire on user-visible service-level indicators (SLIs: error rate, latency) against their SLO targets, not on host counters; Google's canarying guidance likewise checks absolute SLOs [GOOG5]".
+14. **Fix "roll back" in the Mitigate step.** In a section about incidents no rollout caused, "(roll back, flag off, fail over, scale out)" reads as II.9's job. -> "(config revert, flag off, fail over, scale out, restart)".
+15. **Complete chart 2.** Label the bare edge `IC --> PMA` as `IC -- "after mitigation" --> PMA`, and change `SRE -- "Advise: cause + evidence" --> IC` to `"Advise, Prepare:<br/>cause, exact step"` so the table's L1 appears. Keep the legend line. Height (591px) has room.
+16. **Weak blameless citation.** "(a practice Meta names [META4])" rests on a config-safety podcast page (grade C). Either say "one Meta podcast names the practice [META4]" or drop the citation and keep it as a Recommendation.
+
+## Overlap check
+
+- **II.9:** Azure SRE Agent is explained in both (same "within defined guardrails" quote). II.11 is the right home for the full explainer; II.9 can keep its one sentence. The SRE agent's rung table duplicates II.9's almost row for row with diverging L3 guardrails (edit 2). Watchdog no-go and "roll back" in the deterministic chart reach into II.9 (edits 3, 14). REQ-OBS-04 correctly defers rollout mitigations to II.9.
+- **II.2:** the Uber context graph read by "the II.2 grilling agent" is a correct cross-reference, not overlap.
+- REQ IDs (REQ-OBS-01, REQ-IDN-01, REQ-CTX-01) clash with other sections; fine per conventions.
+
+## Rung-consistency check
+
+- Ceiling stated (L3, few reversible single-service runbook actions); SRE L4 marked "Future proposal". Pass.
+- No agent approves its own output: L3 SRE actions are pre-approved per action in D6; postmortem drafts are owner-signed (REQ-OBS-05). Pass, except the postmortem L3 row versus chart 2's "Owner approves" gate (edit 1) and the postmortem role having no stated ceiling.
+- Labels: Advise row "runs the alert-type diagnostic handler" is read-only diagnosis, correctly Advise. Pass.
+- Role names match between chart and table ("On-call / SRE agent" vs "On-call/SRE agent": trivial spacing; align to II.9's "On-call/SRE agent").
+
+## Verdict
+
+**READY AFTER EDITS.** Edits 1 to 4 are required (rung consistency, II.9 overlap, chart scope, overclaim); 5 to 16 are clarity and length cuts.

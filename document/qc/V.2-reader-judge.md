@@ -1,0 +1,55 @@
+# Reader judge: V.2 Factory reference architecture (other components)
+
+Reader: a busy Microsoft engineering leader deciding what to build, buy or adopt for a factory around one existing service. V.2 is not a PDLC stage, so criterion 1 is read as "is it clear what stays deterministic and where agents enter", not as a rung table.
+
+Length: about 1,730 words of prose (tables and diagram excluded), against a 1,300 to 1,700 target (±20% allows up to 2,040). Within tolerance, but the Components block alone is about 1,300 words and carries most of the excess.
+
+Diagram D9 validator: `V.2.md block 1: OK [natural 833x660, shown 672x532, text 12.9px]`, no WARN. Preview: `/tmp/claude-0/-home-user/2189683f-6889-5771-8b9c-41633a228239/scratchpad/previews/V.2-block1.png`.
+
+## Scores
+
+| # | Criterion | Score | Reason |
+|---|---|---|---|
+| 1 | Clarity (deterministic vs agentic) | 4 | The edge / boundary / core split is crisp and REQ-OBS-01 makes "core works without models" testable; but "build or buy" is never stated per component, and the leader must infer it from GAP markers. |
+| 2 | Reading flow | 4 | Intro, chart, ten uniform component paragraphs, map, principles, requirements: easy to scan. The ten paragraphs are citation-dense and read as a list of evidence rather than a design. |
+| 3 | References explained before use | 3 | 1ES, SFI, ACH, SPIRE, WIF, OBO and "CCA" appear without a gloss; Gandalf, SDP, DRS and SubmitQueue are explained in Part II and 0.5, so they are acceptable here. |
+| 4 | Detail and length | 3 | Within the limit, but several evidence sentences repeat Part II (Gandalf 92.4%, Fleet "Completed" quote, Stripe devboxes, OpenAI map quote) and the Identity paragraph and one "How the pieces fit" bullet repeat III.3 and IV.7. A flag/config service and the incident system are missing as components. |
+| 5 | Message | 4 | One takeaway lands: "the factory is mostly deterministic plumbing; agents reach it only through identity and two gateways; invest in gateways, verifiers and ledger, not the agent product". Stated in line 3 and the closing bullets. |
+| 6 | Diagram D9 | 4 | Readable at column width (12.9px, 532px tall), orange agent nodes plus a legend, consistent with II.9 and II.2. Minor clutter: empty nested boxes double the borders, subgraph titles collide ("Deterministic core" / "Change path"), and sandboxes and the watchdog halt are only in the legend. |
+
+## Answers to the four brief questions
+
+- **Would a leader know what to build or buy?** Partly. Each component has a Microsoft option and a frontier reference, but the section never says "adopt", "build" or "build on". The leader has to work out that the model gateway, merge queue and risk score, and the trust ledger are build items (all [GAP] on the Microsoft side), while identity, deployment and AI review are adopt items. One column fixes this (edit 1).
+- **Is D9 readable?** Yes. Text is 12.9px at 672px, there is no WARN, and the structure is clear in two seconds. The fixes are cosmetic (edit 10).
+- **Overlap with V.1, III, IV?** V.1: none of note; Context layer correctly defers. III: the Identity paragraph repeats III.3 (Entra Agent ID sponsor, activity logged as agent, Conditional Access, static API keys). IV: the BeyondProd quote and MCP resource-server rule repeat IV.4, and the "factory is a production system" bullet repeats IV.7's recommendation and IV's REQ-SEC-01 almost word for word (edits 4, 5).
+- **Consistent with what Part II requires?** Mostly. Gaps: (a) no **feature flag and config service**, although II.9 REQ-DEP-01/REQ-CFG-01, II.10 REQ-CFG-01 and IV.6 depend on it and Step 1 has flag-cleanup agents; (b) no **incident and postmortem system** (II.11 REQ-OBS-02/05); (c) the **API contract repo and breaking-change diff** (II.4 REQ-API-01/02) and **signed build provenance** (II.8 REQ-SEC-01) have no named home. Step timing also conflicts with III.4: the control plane and sandboxes are "from Step 1", but III.4 Step 0 already runs readiness agents at Prepare, and V.2's own REQ-PIPE-01 says no agent runs without a control-plane task (edit 2). The skeleton asked for each component to be traced to REQ-IDs; V.2 traces to stages and steps, which is adequate if edit 3's column is added or the proposed interface sheet is accepted.
+
+## Concrete edits
+
+1. **Component map table (line 64): add a "Build or buy" column.** Suggested values: Control plane: build on CCA/ADO; Execution sandboxes: adopt Cloud PCs, build images; Model gateway: build [GAP]; Tool/MCP gateway: build on Entra-protected MCP; Identity: adopt; Context layer: build (V.1, D3); Verification service: adopt AI review, build tiers; Risk scoring and merge queue: build [GAP]; Deployment orchestrator: adopt SDP/ADO, build ring-plan adapter; Observability and watchdog: adopt Gandalf-style halt; Trust ledger: build (D7). Add one sentence under the table: "Three items have no Microsoft product in our sources and are build work: the model gateway, the merge queue with risk score, and the trust ledger." This is the single change that answers the reader's main question.
+2. **Fix Step timing (line 40 and line 42, table rows lines 66-67).** Replace "Needed by II.1, II.5 and II.12, from Step 1." with "Needed by II.1, II.5 and II.12, from Step 0 (readiness agents already run as tasks, see III.4)." Same for sandboxes ("from Step 1" to "from Step 0"), and change both table cells to "Step 0". Otherwise REQ-PIPE-01 is violated by III.4 Step 0.
+3. **Add a missing component paragraph and table row: "Feature flag and config service."** Text: "It versions every flag and config change, rides the same rings as code and can turn a flag off in one call (see II.9, II.10, IV.6). It is the kill switch the on-call agent uses at Act, then notify. Needed by II.9 to II.12, from Step 0." Use only the Microsoft/frontier evidence already cited in II.10 and IV.6 (Meta config safety, SDP) or mark [GAP]. Also add one clause to "Observability and watchdog": "...and opens the incident record that the SRE agent and postmortem write to (see II.11)."
+4. **Cut the Identity paragraph (line 48) to two sentences** and defer: "Every agent, pipeline and service has its own identity, and the requester travels with each call: Entra Agent ID for agents, managed identity and workload identity federation (WIF) for services and pipelines, no stored secrets [MS12, MS16, MS17]. Actor-of-record modes are in III.3 and token flows in IV.4." Delete the Conditional Access sentence and the BeyondProd quote (both in III.3 / IV.4). Saves about 60 words.
+5. **Delete the bullet "The factory is a production system. Gateways, sandboxes and tool servers are in SFI scope (see IV.4, IV.7) and change through the same rings as the service."** (line 83). It restates IV.7's recommendation and IV REQ-SEC-01. If kept, reduce to "The factory's own components change through the same rings as the service (security scope: IV.7)."
+6. **Trim evidence that Part II already carries.**
+   - Line 40: delete "1ES describes an AI and agent factory that treats specs "as a single source of truth" [MS7]." (unexplained "1ES", adds nothing to the control-plane design).
+   - Line 42: delete "and Conditional Access has an "agent execution environments" condition (preview) [MS24]" and "one Uber talk describes pre-provisioned repo snapshots and a "mega DevPod" holding all repos for cross-repo work [AIE2]".
+   - Line 52: delete "one Uber talk says "Earlier validation is part of capacity management" [AIE2]."
+   - Line 56: replace the Fleet sentence with "AKS Fleet Manager stages cluster and node-image upgrades, not application rollouts, so the orchestrator must coordinate with it (see II.9) [MS21]"; drop the "Completed" quote, already II.9 REQ-PIPE-01.
+   - Line 58: replace "it reached 92.4% precision and 100% recall on the data plane [MS5]" with "(see II.9 for its measured precision)".
+   - Line 60: delete "one Uber talk describes review comments and merges labelling data that improves the skill which proposed the change [AIE2];".
+   Together these cut roughly 150 words and bring prose to about 1,520 words, mid-target.
+7. **Gloss acronyms at first use.** "SFI" (line 60) to "Microsoft's Secure Future Initiative (SFI)"; "Meta's ACH uses mutants" (line 52) to "Meta's ACH test generator uses mutants (deliberately injected bugs)"; "SPIRE workload identity" (line 44) to "SPIRE (an open-source workload identity system)"; "OBO" in line 46 to "on-behalf-of (OBO) exchange". The quote "CCA cannot open PRs on its own" needs "Copilot Coding Agent (CCA)" earlier in the same sentence, which it has; make the abbreviation explicit there.
+8. **Line 80: soften the overclaim.** Replace "No agent has a write path into a gate, the queue or ring promotion, so none can be talked into anything." with "No agent has a write path into a gate, the queue or ring promotion, so a misled or prompt-injected agent can produce a bad change but cannot wave it through." The original reads as a promise that prompt injection is solved, which IV.7 contradicts.
+9. **Line 3: make the build/buy promise explicit.** Replace "what each does, the Microsoft option first, a frontier reference, and which Part II stages and roadmap steps (see III.4) need it" with "what each does, whether to adopt a Microsoft option or build it, a frontier reference, and the roadmap step (see III.4) by which it must exist". This sets up edit 1.
+10. **D9 diagram cleanup** (re-run the validator after each change).
+    - Remove the empty wrapper subgraphs: make `EDGE` and `BND` themselves `direction LR` and put the three nodes directly inside, deleting `EROW` and `BROW`. This removes the double borders and the title clipping on "Agentic edges".
+    - Rename `EDGE` to `"Agentic edges, in sandboxes"` so the sandbox component appears on the chart.
+    - Inside `CORE`, add `WD -. halt .-> DEP` only if the validator stays without WARN; otherwise keep it in the legend. The `PATH ~~~ SHARED` link plus the stacked titles cause "Deterministic core" and "Change path" to collide; giving `CORE` a title with a trailing line break or renaming `PATH` to `"Change path: one way in"` usually separates them.
+    - If edit 3 is applied, add `FLG["Flag and<br/>config service"]` to the `SHARED` row (it will still fit at four nodes).
+11. **Requirements line 87 note.** REQ-SEC-01 here (model-gateway egress) and IV's REQ-SEC-01 (SFI scope) are different statements; fine after renumbering. But REQ-IDN-01 here ("tool registry; small default set") sits close to IV REQ-IDN-03 (audience-bound MCP servers). Add "(complements IV.4)" to its rationale so the assembler does not merge or drop one.
+12. **Open gaps (line 107).** Keep the proposed interface sheet; add "Proposed kit item: a build-or-buy sheet per component" only if edit 1 is not taken, otherwise skip it.
+
+## Verdict
+
+**READY AFTER EDITS.** The architecture is sound and the deterministic boundary is the clearest in the document. Edits 1 to 3 are needed before assembly (build/buy column, Step 0 timing, flag/config service); edits 4 to 6 cut repetition with III, IV and Part II; the diagram needs only cosmetic fixes.

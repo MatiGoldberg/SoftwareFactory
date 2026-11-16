@@ -1,0 +1,159 @@
+# Requirement ID renumbering map
+
+Requirement IDs were renumbered across the whole document on 2026-11-16, in document order (0, I, II.1 to II.12, III, IV, V.1, V.2, VI, VII, D1, D-kit), numbering per area. Every in-text mention was updated; mentions that name another section were mapped with that section's old numbering.
+
+| Section | Old ID | New ID |
+|---|---|---|
+| II.1 | REQ-PRD-01 | REQ-PRD-01 |
+| II.1 | REQ-OWN-01 | REQ-OWN-01 |
+| II.1 | REQ-OWN-02 | REQ-OWN-02 |
+| II.1 | REQ-PRD-02 | REQ-PRD-02 |
+| II.1 | REQ-SEC-01 | REQ-SEC-01 |
+| II.1 | REQ-GOV-01 | REQ-GOV-01 |
+| II.1 | REQ-CTX-01 | REQ-CTX-01 |
+| II.2 | REQ-PRD-01 | REQ-PRD-03 |
+| II.2 | REQ-PRD-02 | REQ-PRD-04 |
+| II.2 | REQ-PRD-03 | REQ-PRD-05 |
+| II.2 | REQ-OWN-01 | REQ-OWN-03 |
+| II.2 | REQ-CTX-01 | REQ-CTX-02 |
+| II.2 | REQ-SEC-01 | REQ-SEC-02 |
+| II.2 | REQ-GOV-01 | REQ-GOV-02 |
+| II.3 | REQ-VER-01 | REQ-VER-01 |
+| II.3 | REQ-VER-02 | REQ-VER-02 |
+| II.3 | REQ-VER-03 | REQ-VER-03 |
+| II.3 | REQ-CTX-01 | REQ-CTX-03 |
+| II.3 | REQ-API-01 | REQ-API-01 |
+| II.3 | REQ-OWN-01 | REQ-OWN-04 |
+| II.3 | REQ-GOV-01 | REQ-GOV-03 |
+| II.4 | REQ-API-01 | REQ-API-02 |
+| II.4 | REQ-API-02 | REQ-API-03 |
+| II.4 | REQ-API-03 | REQ-API-04 |
+| II.4 | REQ-API-04 | REQ-API-05 |
+| II.4 | REQ-OWN-02 | REQ-OWN-05 |
+| II.4 | REQ-SEC-02 | REQ-SEC-03 |
+| II.4 | REQ-REV-01 | REQ-REV-01 |
+| II.5 | REQ-CTX-01 | REQ-CTX-04 |
+| II.5 | REQ-PIPE-01 | REQ-PIPE-01 |
+| II.5 | REQ-VER-01 | REQ-VER-04 |
+| II.5 | REQ-COST-01 | REQ-COST-01 |
+| II.5 | REQ-REV-01 | REQ-REV-02 |
+| II.5 | REQ-GOV-01 | REQ-GOV-04 |
+| II.5 | REQ-IDN-01 | REQ-IDN-01 |
+| II.5 | REQ-REPO-01 | REQ-REPO-01 |
+| II.6 | REQ-REV-01 | REQ-REV-03 |
+| II.6 | REQ-REV-02 | REQ-REV-04 |
+| II.6 | REQ-REV-03 | REQ-REV-05 |
+| II.6 | REQ-REV-04 | REQ-REV-06 |
+| II.6 | REQ-REV-05 | REQ-REV-07 |
+| II.6 | REQ-REV-06 | REQ-REV-08 |
+| II.6 | REQ-IDN-01 | REQ-IDN-02 |
+| II.6 | REQ-OWN-01 | REQ-OWN-06 |
+| II.7 | REQ-VER-01 | REQ-VER-05 |
+| II.7 | REQ-VER-02 | REQ-VER-06 |
+| II.7 | REQ-VER-03 | REQ-VER-07 |
+| II.7 | REQ-VER-04 | REQ-VER-08 |
+| II.7 | REQ-VER-05 | REQ-VER-09 |
+| II.7 | REQ-VER-06 | REQ-VER-10 |
+| II.7 | REQ-VER-07 | REQ-VER-11 |
+| II.7 | REQ-VER-08 | REQ-VER-12 |
+| II.8 | REQ-MRG-01 | REQ-MRG-01 |
+| II.8 | REQ-MRG-02 | REQ-MRG-02 |
+| II.8 | REQ-MRG-03 | REQ-MRG-03 |
+| II.8 | REQ-MRG-04 | REQ-MRG-04 |
+| II.8 | REQ-MRG-05 | REQ-MRG-05 |
+| II.8 | REQ-MRG-06 | REQ-MRG-06 |
+| II.8 | REQ-REPO-01 | REQ-REPO-02 |
+| II.8 | REQ-SEC-01 | REQ-SEC-04 |
+| II.9 | REQ-DEP-01 | REQ-DEP-01 |
+| II.9 | REQ-DEP-02 | REQ-DEP-02 |
+| II.9 | REQ-DEP-03 | REQ-DEP-03 |
+| II.9 | REQ-DEP-04 | REQ-DEP-04 |
+| II.9 | REQ-PIPE-01 | REQ-PIPE-02 |
+| II.9 | REQ-PIPE-02 | REQ-PIPE-03 |
+| II.9 | REQ-CFG-01 | REQ-CFG-01 |
+| II.9 | REQ-OBS-01 | REQ-OBS-01 |
+| II.10 | REQ-PRD-01 | REQ-PRD-06 |
+| II.10 | REQ-OBS-01 | REQ-OBS-02 |
+| II.10 | REQ-OBS-02 | REQ-OBS-03 |
+| II.10 | REQ-CFG-01 | REQ-CFG-02 |
+| II.10 | REQ-CFG-02 | REQ-CFG-03 |
+| II.10 | REQ-GOV-01 | REQ-GOV-05 |
+| II.10 | REQ-SEC-01 | REQ-SEC-05 |
+| II.11 | REQ-OBS-01 | REQ-OBS-04 |
+| II.11 | REQ-OBS-02 | REQ-OBS-05 |
+| II.11 | REQ-OBS-03 | REQ-OBS-06 |
+| II.11 | REQ-OBS-04 | REQ-OBS-07 |
+| II.11 | REQ-OBS-05 | REQ-OBS-08 |
+| II.11 | REQ-IDN-01 | REQ-IDN-03 |
+| II.11 | REQ-OWN-01 | REQ-OWN-07 |
+| II.11 | REQ-CTX-01 | REQ-CTX-05 |
+| II.12 | REQ-REPO-01 | REQ-REPO-03 |
+| II.12 | REQ-REPO-02 | REQ-REPO-04 |
+| II.12 | REQ-OWN-01 | REQ-OWN-08 |
+| II.12 | REQ-VER-01 | REQ-VER-13 |
+| II.12 | REQ-CTX-01 | REQ-CTX-06 |
+| II.12 | REQ-MRG-01 | REQ-MRG-07 |
+| II.12 | REQ-GOV-01 | REQ-GOV-06 |
+| II.12 | REQ-DEP-01 | REQ-DEP-05 |
+| III | REQ-GOV-01 | REQ-GOV-07 |
+| III | REQ-GOV-02 | REQ-GOV-08 |
+| III | REQ-GOV-03 | REQ-GOV-09 |
+| III | REQ-GOV-04 | REQ-GOV-10 |
+| III | REQ-GOV-05 | REQ-GOV-11 |
+| III | REQ-GOV-06 | REQ-GOV-12 |
+| III | REQ-GOV-07 | REQ-GOV-13 |
+| III | REQ-GOV-08 | REQ-GOV-14 |
+| III | REQ-GOV-09 | REQ-GOV-15 |
+| III | REQ-GOV-10 | REQ-GOV-16 |
+| III | REQ-GOV-11 | REQ-GOV-17 |
+| IV | REQ-IDN-01 | REQ-IDN-04 |
+| IV | REQ-IDN-02 | REQ-IDN-05 |
+| IV | REQ-IDN-03 | REQ-IDN-06 |
+| IV | REQ-IDN-04 | REQ-IDN-07 |
+| IV | REQ-IDN-05 | REQ-IDN-08 |
+| IV | REQ-PIPE-01 | REQ-PIPE-04 |
+| IV | REQ-PIPE-02 | REQ-PIPE-05 |
+| IV | REQ-REPO-01 | REQ-REPO-05 |
+| IV | REQ-OWN-01 | REQ-OWN-09 |
+| IV | REQ-CFG-01 | REQ-CFG-04 |
+| IV | REQ-SEC-01 | REQ-SEC-06 |
+| IV | REQ-SEC-02 | REQ-SEC-07 |
+| IV | REQ-COST-01 | REQ-COST-02 |
+| V.1 | REQ-CTX-01 | REQ-CTX-07 |
+| V.1 | REQ-OWN-01 | REQ-OWN-10 |
+| V.1 | REQ-CTX-02 | REQ-CTX-08 |
+| V.1 | REQ-CTX-03 | REQ-CTX-09 |
+| V.1 | REQ-CTX-04 | REQ-CTX-10 |
+| V.1 | REQ-OWN-02 | REQ-OWN-11 |
+| V.1 | REQ-OWN-03 | REQ-OWN-12 |
+| V.1 | REQ-CTX-05 | REQ-CTX-11 |
+| V.1 | REQ-OWN-04 | REQ-OWN-13 |
+| V.2 | REQ-PIPE-01 | REQ-PIPE-06 |
+| V.2 | REQ-SEC-01 | REQ-SEC-08 |
+| V.2 | REQ-IDN-01 | REQ-IDN-09 |
+| V.2 | REQ-GOV-01 | REQ-GOV-18 |
+| V.2 | REQ-OBS-01 | REQ-OBS-09 |
+| V.2 | REQ-PIPE-02 | REQ-PIPE-07 |
+| V.2 | REQ-PIPE-03 | REQ-PIPE-08 |
+
+## Count by area
+
+| Area | Requirements |
+|---|---|
+| CTX | 11 |
+| VER | 13 |
+| REV | 8 |
+| MRG | 7 |
+| DEP | 5 |
+| OBS | 9 |
+| IDN | 9 |
+| REPO | 5 |
+| API | 5 |
+| PIPE | 8 |
+| OWN | 13 |
+| CFG | 4 |
+| SEC | 8 |
+| GOV | 18 |
+| COST | 2 |
+| PRD | 6 |
+| Total | 131 |

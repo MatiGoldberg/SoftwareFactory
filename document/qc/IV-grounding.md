@@ -1,0 +1,45 @@
+# IV grounding QC
+
+Section: `document/sections/IV.md`. Reviewed against `01-conventions.md`, `references.md` and the cited source notes (files 01, 07, 08, 09, 10, 11, 12, 13, 14). Part IV is a cross-cutting enterprise part, not a PDLC stage, so the Part II heading template does not apply. Requirement-ID clashes were ignored, as instructed. IV.4 was checked line by line against notes 09 and 12.
+
+## What checks out
+
+- All 31 codes map to the right source IDs: MS1, MS2, MS16 to MS28, MABL1, AIE2, AIE5, GOOG6, GOOG7, SPOT2, SPOT5, SPOT6, SPOT7, AWS1, AWS3, META4, ATL1, MCP1, UBER2, SHOP1.
+- **IV.4 against note 09.** MS16: one user-assigned identity per group doing the same task, system-assigned for per-resource audit, code execution inherits identity, tokens cached about 24 h so a role edit is not a fast revocation; the quote "always grant the least permissions needed" is a verbatim substring. MS17: the scenario list (Kubernetes, GitHub Actions, Azure Pipelines, other clouds, SPIFFE/SPIRE), the IdP-to-Entra token exchange, exact issuer/subject/audience match, and the quote "eliminates the risk of leaking secrets or having certificates expire" are all exact. MS18: about 100 users, resettable Cloud PCs, phased rollout, and the quote (a verbatim substring) are exact.
+- **IV.4 against note 12.** MS22: user token addressed to the blueprint, blueprint gets T1 with a managed identity as federated credential, child agent identity exchanges both for a resource token, no interactive sign-in, preauthorized inheritable permissions, refresh tokens for background work: all exact. MS23: "can also serve as APIs for On-Behalf-Of scenarios" is a verbatim substring, and the three modes match. MS24: the quote "Conditional Access is evaluated whenever Microsoft Entra ID issues or refreshes an access token", one subject per token, blueprint and attribute targeting covering future agents, API keys bypassing CA: all exact. MCP1: OAuth 2.1 resource server, the `resource` parameter, the MUST quote (verbatim, bold dropped), no token passthrough, 403 `insufficient_scope` step-up: all exact. GOOG7: provenance, service identity and trusted hardware; identity bound to the microservice, not host/IP; per-RPC authorization; the verbatim quote; short-lived, integrity-protected end-user context tickets; signed build manifests, two-person review and gVisor (IV.7): all exact.
+- Other numbers and quotes are exact: 47 change types and the board (MS25), "DO ensure that customer workloads never break" (MS26), 900+ services and 3,800 repos (MS28), 79 repos and 25 engineers (MABL1), 150 node and edge types and the mega DevPod (AIE2), the Fleet quote (MS21), 1,000 merged PRs in 10 days (SPOT7), "we now have 76% more PRs to review." (SPOT2), AI costs up six times since 2024 (UBER2), $250 per person per day (SHOP1), both GOOG6 quotes, the MS19, MS20, MS28 and SPOT6 quotes.
+- Weak sources are mostly flagged: AIE2 and AIE5 say "one conference talk", mabl and Atlassian say "vendor-reported", META4 says "podcast page ... framing only".
+- Gaps use [GAP] and are repeated under Open gaps. The "(summary)" migration lesson is flagged in REQ-IDN-05 and in Open gaps.
+- REQ areas (IDN, PIPE, OWN, SEC, COST) are all on the conventions list; every requirement is MUST or SHOULD.
+- No rung names are used, so there is nothing to mis-name. No em-dashes or en-dashes.
+- Both Mermaid blocks pass the validator with no WARN (text 13.7px and 16.0px; heights 647px and 680px).
+- Cross-references are used rather than re-explained: V.1 (catalog, graph, intake response time), D5, D6, III.2 (harness change rule, which III.2 does state), III.3 (agent ID modes, which III.3 does set), II.x throughout. The two new kit items are marked "(template: proposed)".
+- Microsoft first holds in every subsection: Entra and managed identity before BeyondProd, MS25 before AWS, MS2 before AWS and Spotify.
+
+## Issues
+
+| Location | Issue | Severity | Fix |
+|---|---|---|---|
+| IV.4 "The agent's own identity", MS23 sentence: "which is what makes multi-hop delegation possible" | The MS23 note says only that agent entities are confidential clients that can serve as APIs for OBO. It says nothing about multi-hop delegation. The inference is ours, but it reads as part of the cited Microsoft claim. | med | Cut the clause, or write "**Recommendation:** this is the property a multi-hop OBO chain relies on." |
+| IV.4 "Migrating an existing estate": "BeyondProd's mutual authentication had to come before access management, and Google reportedly started by logging violations..." [GOOG7] | The note marks the whole migration lesson "(summary)", including the ALTS-before-access-management part. Only the second half is softened. | med | Write "Google reportedly had to roll out mutual authentication before access management, and started by logging violations before blocking them [GOOG7]." |
+| IV.4 workload identity federation bullet: "That exact match is the blast-radius control: scope each federated credential to one repo, branch, environment or namespace." | This is our guidance (from the note's Relevance line, not Microsoft's text), placed between two cited MS17 statements without a label. | med | Start the sentence with "**Recommendation:**". |
+| IV.3 "What others did": "For clusters, AKS Fleet Manager stages updates through stages and groups..." [MS21]; and "Stage detail: ... II.9 (rings, Fleet)" | The MS21 note covers Kubernetes version and node-image upgrades across clusters only, not application rollouts. In a paragraph about deployment pipelines, the unqualified "updates" and the "rings, Fleet" pointer let a reader take Fleet as an app-rollout tool. The quote and mechanisms are exact; the scope is not stated. | med | Write "For the clusters themselves, AKS Fleet Manager stages Kubernetes and node-image upgrades through stages and groups..." and change the pointer to "II.9 (rings; Fleet for cluster upgrades)". |
+| IV.4 Conditional Access sentence, and the diagram node "Entra ID / Conditional Access" after "OBO exchange" | Accurate, but omits the MS24 point that under OBO Conditional Access evaluates the user's policies, not the agent's. The recommendation to chain OBO depends on this. III.3 states it, so this is a clarity gap, not an error. | low | Add "under OBO it evaluates the user's policies, not the agent's (see III.3)" after "each token has one subject". |
+| IV.4 "Tools behind audience-bound MCP servers", first sentence [MCP1] | MCP1 is a draft spec (grade C) and covers the HTTP transport only. The text calls it "the MCP authorization spec". | low | Write "The draft MCP authorization spec, for HTTP transport, makes...". |
+| IV.4 opening of "Service identity first": "Zero trust between services comes before agent identity." | Sequencing claim of our own, unlabelled. It is supported by the (summary) BeyondProd lesson but not stated by any source. | low | Fold into a "**Recommendation:**" or write "We put service identity first:". |
+| IV.4 throughout (MS16, MS17, MS22, MS23, MS24) | All grade C product documentation, used correctly for product behaviour, but the reader gets no signal that this is documented design, not measured practice. Same finding as III QC. | low | Add "per Microsoft Learn" once at the start of the managed identity bullet. |
+| IV.8 Shopify sentence [SHOP1]; IV.5 Spotify accountability sentence [SPOT6] | Both grade C (an investor interview; a fireside-chat recap the note calls "framing source, no data") with no in-words label. | low | Write "Shopify's head of engineering said in an interview..." and "in a fireside chat Spotify frames...". |
+| Requirements, REQ-IDN-01, REQ-IDN-02, REQ-IDN-03 Source column | Each states our synthesis (no stored secrets anywhere; one identity per runner pool; tool servers call downstream with MI or OBO, which MCP1 does not say) but omits "Recommendation", unlike IDN-04 and IDN-05. | low | Add "; Recommendation" to all three. |
+| Requirements, REQ-OWN-01 and REQ-SEC-01 areas | Valid areas, but REPO (multi-repo) fits a cross-repo change-set ID better, and CFG (config) fits agent configuration as production config better. | low | Optionally renumber to REQ-REPO-01 and REQ-CFG-01. Assembly renumbers anyway. |
+| IV.1 Recommendation: "the same order governs merge (see II.8) and deployment (see IV.2)" | IV.2 does not set a deployment order; it covers contract gates and two-phase deploys, with rollout order in II.9. | low | Write "(see II.9)" or "(see IV.2 and II.9)". |
+| IV.8 Recommendation: "Tokens go through the central gateway (see III)" | Vague cross-reference; the gateway is named in III.4 (Step 0 and the cost paragraph). | low | Write "(see III.4)". |
+
+## Counts
+
+- High: 0
+- Medium: 4
+- Low: 9
+
+## Verdict
+
+**PASS WITH FIXES.** Every number, quote and code mapping is exact, including all Entra Agent ID, OBO, Conditional Access, MCP authorization and BeyondProd claims in IV.4. The fixes are labelling: one inference attached to MS23, one half-softened "(summary)" item, one unlabelled recommendation inside the federation bullet, and an unstated scope for AKS Fleet (cluster upgrades, not app rollouts) in IV.3.
