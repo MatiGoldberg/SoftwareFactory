@@ -1,16 +1,18 @@
 #!/usr/bin/env node
-// Builds the assembled document into one PDF.
+// Builds the assembled document into one versioned PDF.
 //
-//   npm run build            (or: make build)
+//   make build [DIAGRAMS=excalidraw|mermaid]
+//   node tools/build-pdf.mjs [--diagrams excalidraw|mermaid] [--help]
 //
-// Steps:
-//   1. Assemble document/sections/*.md in document order (see ORDER below,
-//      which follows document/00-skeleton.md and the published Claude Doc).
-//   2. Render every document/diagrams/*.excalidraw to SVG (published/diagrams/).
-//   3. Convert the Markdown to HTML; Mermaid blocks are rendered by Mermaid,
-//      Excalidraw panels replace their Mermaid twins (see DIAGRAMS / FIGURES).
-//   4. Print to PDF with headless Chromium: published/<OUT_NAME>.pdf
+// Steps (each is traced on the console):
+//   1. Check inputs          5. Render HTML and Mermaid diagrams
+//   2. Start headless Chromium  6. Print PDF
+//   3. Render Excalidraw figures (excalidraw mode only)
+//   4. Assemble document/sections/*.md in document order (ORDER below)
+//   7. Copy the PDF to its stable "latest" name
 //
+// Each run writes to its own folder, published/builds/<date>_<time>_<commit>_<mode>/,
+// so earlier builds are never overwritten.
 // Everything runs locally from node_modules; no network access is needed.
 
 import fs from 'node:fs';
@@ -65,20 +67,93 @@ const ORDER = [
 // dropped from the sections (as in the Claude Doc).
 const STRIP_HEADINGS = ['Open gaps'];
 
-// Diagram source. Several diagrams exist twice: as a Mermaid block in a
-// section and as a hand-drawn Excalidraw file. DIAGRAMS picks which version
-// goes into the PDF, so each diagram appears exactly once:
+// ---------------------------------------------------------------------------
+// Command line. Strict: anything not listed here stops the build with usage.
+// ---------------------------------------------------------------------------
+// Diagram source. Twelve diagrams exist twice: as a Mermaid block in a section
+// and as a hand-drawn Excalidraw panel. The mode picks one version of each:
 //   excalidraw (default)  Excalidraw where a version exists; Mermaid for the rest
 //   mermaid               every diagram from its Mermaid block; no Excalidraw
-// Set it with `make build DIAGRAMS=mermaid`, `npm run build -- --diagrams=mermaid`
-// or the DIAGRAMS environment variable.
 const MODES = ['excalidraw', 'mermaid'];
-function diagramMode() {
-  const arg = process.argv.find(a => a.startsWith('--diagrams='));
-  const mode = (arg ? arg.split('=')[1] : process.env.DIAGRAMS || 'excalidraw').trim().toLowerCase();
-  const resolved = mode === 'auto' || mode === '' ? 'excalidraw' : mode;
-  if (!MODES.includes(resolved)) throw new Error(`Unknown diagram mode "${mode}". Use one of: ${MODES.join(', ')}`);
-  return resolved;
+
+const BANNER = String.raw`
+   +------------------------------------------------------+
+   |   [spec] --> [code] --> [verify] --> [ship]  ==> PDF |
+   |        S O F T W A R E   F A C T O R Y   build       |
+   +------------------------------------------------------+`;
+
+const USAGE = `Usage: node tools/build-pdf.mjs [options]
+       make build [DIAGRAMS=excalidraw|mermaid]
+
+Builds the assembled document into a versioned PDF under published/builds/.
+
+Options:
+  -d, --diagrams <mode>   Diagram source, one of: ${MODES.join(', ')}
+                          excalidraw (default): Excalidraw figures where they
+                            exist, Mermaid for diagrams that only exist in Mermaid
+                          mermaid: every diagram from its Mermaid block
+  -h, --help              Show this help and exit
+
+Environment:
+  DIAGRAMS                Same as --diagrams, used when the option is not given
+  CHROMIUM_PATH           Use this Chromium instead of Playwright's
+
+Output (never overwritten; a new folder per run):
+  published/builds/<date>_<time>_<commit>_<mode>/${'agentic-pdlc'}_<date>_<time>_<mode>.pdf
+  plus the assembled .md, .html and diagram SVGs in the same folder.
+  The newest build of each mode is also copied to a stable name:
+  published/agentic-pdlc.pdf (excalidraw) and published/agentic-pdlc-mermaid.pdf.`;
+
+class UsageError extends Error {}
+
+function parseArgs(argv) {
+  const opts = { help: false, diagrams: null };
+  const known = ['--diagrams', '-d', '--help', '-h'];
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '-h' || arg === '--help') { opts.help = true; continue; }
+    let name = arg, value;
+    const eq = arg.indexOf('=');
+    if (arg.startsWith('--') && eq > 0) { name = arg.slice(0, eq); value = arg.slice(eq + 1); }
+    if (name === '--diagrams' || name === '-d') {
+      if (value === undefined) {
+        value = argv[++i];
+        if (value === undefined || value.startsWith('-')) throw new UsageError(`${name} needs a value: one of ${MODES.join(', ')}`);
+      }
+      if (opts.diagrams !== null) throw new UsageError(`${name} given more than once`);
+      if (!MODES.includes(value)) throw new UsageError(`unknown diagram mode "${value}" for ${name}; use one of: ${MODES.join(', ')}`);
+      opts.diagrams = value;
+      continue;
+    }
+    const near = known.find(k => k.toLowerCase() === name.toLowerCase());
+    if (near) throw new UsageError(`unknown option "${name}"; options are case-sensitive, did you mean "${near}"?`);
+    if (arg.startsWith('-')) throw new UsageError(`unknown option "${arg}"`);
+    throw new UsageError(`unexpected argument "${arg}"; this script takes no positional arguments`);
+  }
+  // `npm run build --diagrams=x` (without the extra --) hands the flag to npm, not to us.
+  for (const k of Object.keys(process.env)) {
+    if (/^npm_config_(diagrams|d)$/i.test(k)) throw new UsageError(`npm swallowed "--${k.slice(11)}"; put "--" before script options: npm run build -- --diagrams=${process.env[k] === 'true' ? '<mode>' : process.env[k]}`);
+  }
+  if (opts.diagrams === null && process.env.DIAGRAMS !== undefined && process.env.DIAGRAMS !== '') {
+    const env = process.env.DIAGRAMS;
+    if (!MODES.includes(env)) throw new UsageError(`unknown diagram mode "${env}" in the DIAGRAMS environment variable; use one of: ${MODES.join(', ')}`);
+    opts.diagrams = env;
+  }
+  opts.diagrams ??= 'excalidraw';
+  return opts;
+}
+
+// Step tracer: "[2/7] Render Excalidraw ... done (1.2s)"
+function tracer(total) {
+  let n = 0;
+  return async (title, fn) => {
+    n++;
+    const t0 = Date.now();
+    console.log(`\n[${n}/${total}] ${title}`);
+    const result = await fn(msg => console.log(`      ${msg}`));
+    console.log(`      done in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+    return result;
+  };
 }
 
 // Excalidraw panels and the Mermaid blocks they stand in for. `mermaid` lists
@@ -296,28 +371,77 @@ function gitMeta() {
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
+function stamp() {
+  const d = new Date(), p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+}
+const rel = p => path.relative(ROOT, p);
+
 async function main() {
-  fs.mkdirSync(OUT, { recursive: true });
-  const server = await serve();
-  const base = `http://127.0.0.1:${server.address().port}`;
-  const launch = { headless: true };
-  if (process.env.CHROMIUM_PATH) launch.executablePath = process.env.CHROMIUM_PATH;
-  const browser = await chromium.launch(launch);
+  let opts;
+  try { opts = parseArgs(process.argv.slice(2)); } catch (e) {
+    if (!(e instanceof UsageError)) throw e;
+    console.error(`error: ${e.message}\n\n${USAGE}`);
+    process.exit(2);
+  }
+  if (opts.help) { console.log(BANNER + '\n\n' + USAGE); return; }
+
+  const mode = opts.diagrams;
+  const meta = gitMeta();
+  const shortCommit = meta.commit.split(' ')[0];
+  const when = stamp();
+  // Claim a fresh folder atomically, so two runs in the same second never share one.
+  fs.mkdirSync(path.join(OUT, 'builds'), { recursive: true });
+  let buildDir;
+  for (let k = 1; !buildDir; k++) {
+    const candidate = path.join(OUT, 'builds', `${when}_${shortCommit}_${mode}${k > 1 ? '-' + k : ''}`);
+    try { fs.mkdirSync(candidate); buildDir = candidate; failedBuildDir = candidate; } catch (e) { if (e.code !== 'EEXIST') throw e; }
+  }
+  const baseName = `${OUT_NAME}_${path.basename(buildDir).replace(`_${shortCommit}`, '')}`;
+
+  console.log(BANNER);
+  console.log(`\n   diagrams: ${mode}   commit: ${meta.commit}   output: ${rel(buildDir)}/`);
+
+  const step = tracer(7);
   const errors = [];
+  let server, browser, page, base, md, pdfPath;
+
+  await step('Check inputs', async log => {
+    const files = ORDER.flatMap(o => [o.file, o.insertBeforeHeading?.file].filter(Boolean));
+    const missing = files.filter(f => !fs.existsSync(path.join(DOC, f)));
+    if (mode === 'excalidraw') {
+      for (const d of new Set(FIGURES.map(f => f.diagram))) {
+        if (!fs.existsSync(path.join(DOC, 'diagrams', d + '.excalidraw'))) missing.push(`diagrams/${d}.excalidraw`);
+      }
+    }
+    if (missing.length) { throw new Error('missing input files:\n  ' + missing.map(m => 'document/' + m).join('\n  ')); }
+    for (const dep of ['marked', 'mermaid', '@excalidraw/utils', 'playwright']) {
+      if (!fs.existsSync(path.join(ROOT, 'node_modules', dep))) throw new Error(`missing npm package ${dep}; run "npm install" (or "make install")`);
+    }
+    log(`${files.length} section files, ${mode === 'excalidraw' ? new Set(FIGURES.map(f => f.diagram)).size + ' Excalidraw files' : 'no Excalidraw (mermaid mode)'}`);
+  });
+
   try {
-    const page = await browser.newPage();
-    page.on('pageerror', e => errors.push(String(e)));
-    page.on('console', m => {
-      // Excalidraw falls back from a web worker to the main thread for font subsetting; harmless.
-      if (m.type() === 'error' && !m.text().includes('Failed to use workers for subsetting')) errors.push(m.text());
+    await step('Start headless Chromium', async log => {
+      server = await serve();
+      base = `http://127.0.0.1:${server.address().port}`;
+      const launch = { headless: true };
+      if (process.env.CHROMIUM_PATH) launch.executablePath = process.env.CHROMIUM_PATH;
+      try { browser = await chromium.launch(launch); } catch (e) {
+        throw new Error(`could not start Chromium (${e.message.split('\n')[0]}); run "npx playwright install chromium" or set CHROMIUM_PATH`);
+      }
+      page = await browser.newPage();
+      page.on('pageerror', e => errors.push(String(e)));
+      page.on('console', m => {
+        // Excalidraw falls back from a web worker to the main thread for font subsetting; harmless.
+        if (m.type() === 'error' && !m.text().includes('Failed to use workers for subsetting')) errors.push(m.text());
+      });
+      log(`Chromium ${browser.version()}, local file server on ${base}`);
     });
 
-    // 2. Excalidraw -> SVG, one file per figure (panel), only in excalidraw mode.
-    const mode = diagramMode();
-    console.log(`mode     DIAGRAMS=${mode}`);
-    fs.rmSync(path.join(OUT, 'diagrams'), { recursive: true, force: true });
-    if (mode === 'excalidraw') {
-      fs.mkdirSync(path.join(OUT, 'diagrams'), { recursive: true });
+    await step(mode === 'excalidraw' ? 'Render Excalidraw figures' : 'Render Excalidraw figures (skipped in mermaid mode)', async log => {
+      if (mode !== 'excalidraw') { log('Mermaid is used for every diagram'); return; }
+      fs.mkdirSync(path.join(buildDir, 'diagrams'), { recursive: true });
       await page.goto(`${base}/package.json`);
       for (const fig of FIGURES) {
         const scene = JSON.parse(fs.readFileSync(path.join(DOC, 'diagrams', fig.diagram + '.excalidraw'), 'utf8'));
@@ -327,7 +451,7 @@ async function main() {
           return cx >= p.xMin && cx < p.xMax && cy >= p.yMin && cy < p.yMax;
         };
         const elements = scene.elements.filter(e => !e.isDeleted && inPanel(e));
-        if (!elements.length) throw new Error(`Panel of ${fig.id} is empty; check its FIGURES panel box`);
+        if (!elements.length) throw new Error(`panel of ${fig.id} is empty; check its FIGURES panel box`);
         const svg = await page.evaluate(async ({ elements, scene, base }) => {
           window.EXCALIDRAW_ASSET_PATH = base + '/node_modules/@excalidraw/utils/dist/prod/';
           const ex = await import(base + '/node_modules/@excalidraw/utils/dist/prod/index.js');
@@ -338,56 +462,76 @@ async function main() {
           });
           return el.outerHTML;
         }, { elements, scene, base });
-        fs.writeFileSync(path.join(OUT, 'diagrams', fig.id + '.svg'), svg);
-        console.log(`diagram  ${fig.diagram}.excalidraw${fig.panel ? ' (panel)' : ''} -> published/diagrams/${fig.id}.svg`);
+        fs.writeFileSync(path.join(buildDir, 'diagrams', fig.id + '.svg'), svg);
+        log(`${(fig.diagram + '.excalidraw' + (fig.panel ? ' (panel)' : '')).padEnd(46)} -> diagrams/${fig.id}.svg`);
       }
-    }
-
-    // 1 + 3. Assemble and convert
-    const md = assemble(mode);
-    fs.writeFileSync(path.join(OUT, `${OUT_NAME}.md`), md);
-    const html = toHtml(md, gitMeta());
-    const htmlPath = path.join(OUT, `${OUT_NAME}.html`);
-    fs.writeFileSync(htmlPath, html);
-
-    // Render Mermaid in the page, then print.
-    await page.goto(`${base}/published/${OUT_NAME}.html`, { waitUntil: 'load' });
-    const mermaidResult = await page.evaluate(async (base) => {
-      const { default: mermaid } = await import(base + '/node_modules/mermaid/dist/mermaid.esm.min.mjs');
-      mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose', flowchart: { htmlLabels: true, useMaxWidth: true } });
-      const nodes = [...document.querySelectorAll('pre.mermaid')];
-      const failed = [];
-      for (const [i, n] of nodes.entries()) {
-        try { await mermaid.run({ nodes: [n] }); } catch (e) { failed.push(`#${i + 1}: ${e.message || e}`); }
-      }
-      await Promise.all([...document.images].map(img => img.complete ? null : new Promise(r => { img.onload = img.onerror = r; })));
-      const brokenImages = [...document.images].filter(img => !img.naturalWidth).map(img => img.getAttribute('src'));
-      return { total: nodes.length, rendered: document.querySelectorAll('pre.mermaid svg').length, failed, brokenImages };
-    }, base);
-    const figures = (md.match(/<figure class="excalidraw"/g) || []).length;
-    console.log(`mermaid  ${mermaidResult.rendered}/${mermaidResult.total} blocks rendered; excalidraw figures: ${figures}`);
-    if (mermaidResult.failed.length) throw new Error('Mermaid failures:\n' + mermaidResult.failed.join('\n'));
-    if (mermaidResult.brokenImages.length) throw new Error('Images failed to load: ' + mermaidResult.brokenImages.join(', '));
-
-    await page.emulateMedia({ media: 'print' });
-    const pdfPath = path.join(OUT, `${OUT_NAME}.pdf`);
-    await page.pdf({
-      path: pdfPath,
-      format: 'A4',
-      printBackground: true,
-      displayHeaderFooter: true,
-      headerTemplate: '<div></div>',
-      footerTemplate: `<div style="font-size:8px;color:#777;width:100%;padding:0 16mm;display:flex;justify-content:space-between;"><span>${TITLE.split(':')[0]}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
-      margin: { top: '18mm', bottom: '18mm', left: '16mm', right: '16mm' },
-      outline: true,
-      tagged: true,
     });
-    console.log(`pdf      published/${OUT_NAME}.pdf (${(fs.statSync(pdfPath).size / 1024 / 1024).toFixed(1)} MB)`);
-    if (errors.length) console.warn('browser messages:\n  ' + errors.join('\n  '));
+
+    await step('Assemble sections', async log => {
+      md = assemble(mode);
+      fs.writeFileSync(path.join(buildDir, `${baseName}.md`), md);
+      const words = md.replace(/```[\s\S]*?```/g, '').split(/\s+/).length;
+      log(`${ORDER.length} parts, ~${Math.round(words / 1000)}k words -> ${baseName}.md`);
+    });
+
+    await step('Render HTML and Mermaid diagrams', async log => {
+      fs.writeFileSync(path.join(buildDir, `${baseName}.html`), toHtml(md, meta));
+      await page.goto(`${base}/${rel(buildDir).split(path.sep).join('/')}/${baseName}.html`, { waitUntil: 'load' });
+      const r = await page.evaluate(async (base) => {
+        const { default: mermaid } = await import(base + '/node_modules/mermaid/dist/mermaid.esm.min.mjs');
+        mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose', flowchart: { htmlLabels: true, useMaxWidth: true } });
+        const nodes = [...document.querySelectorAll('pre.mermaid')];
+        const failed = [];
+        for (const [i, n] of nodes.entries()) {
+          try { await mermaid.run({ nodes: [n] }); } catch (e) { failed.push(`#${i + 1}: ${e.message || e}`); }
+        }
+        await Promise.all([...document.images].map(img => img.complete ? null : new Promise(r => { img.onload = img.onerror = r; })));
+        const brokenImages = [...document.images].filter(img => !img.naturalWidth).map(img => img.getAttribute('src'));
+        return { total: nodes.length, rendered: document.querySelectorAll('pre.mermaid svg').length, figures: document.querySelectorAll('figure.excalidraw img').length, failed, brokenImages };
+      }, base);
+      if (r.failed.length) throw new Error('Mermaid failures:\n  ' + r.failed.join('\n  '));
+      if (r.brokenImages.length) throw new Error('images failed to load: ' + r.brokenImages.join(', '));
+      if (r.rendered !== r.total) throw new Error(`only ${r.rendered} of ${r.total} Mermaid blocks rendered`);
+      log(`${r.rendered} Mermaid diagrams + ${r.figures} Excalidraw figures = ${r.rendered + r.figures} diagrams`);
+    });
+
+    await step('Print PDF', async log => {
+      await page.emulateMedia({ media: 'print' });
+      pdfPath = path.join(buildDir, `${baseName}.pdf`);
+      await page.pdf({
+        path: pdfPath,
+        format: 'A4',
+        printBackground: true,
+        displayHeaderFooter: true,
+        headerTemplate: '<div></div>',
+        footerTemplate: `<div style="font-size:8px;color:#777;width:100%;padding:0 16mm;display:flex;justify-content:space-between;"><span>${TITLE.split(':')[0]}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
+        margin: { top: '18mm', bottom: '18mm', left: '16mm', right: '16mm' },
+        outline: true,
+        tagged: true,
+      });
+      const pages = (fs.readFileSync(pdfPath, 'latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
+      log(`${pages} pages, ${(fs.statSync(pdfPath).size / 1024 / 1024).toFixed(1)} MB -> ${rel(pdfPath)}`);
+    });
   } finally {
-    await browser.close();
-    server.close();
+    if (browser) await browser.close();
+    if (server) server.close();
   }
+
+  await step('Publish latest copy', async log => {
+    const latest = path.join(OUT, mode === 'excalidraw' ? `${OUT_NAME}.pdf` : `${OUT_NAME}-${mode}.pdf`);
+    fs.copyFileSync(pdfPath, latest);
+    log(`${rel(latest)} now points at this build`);
+  });
+
+  failedBuildDir = null;
+  if (errors.length) console.warn('\nbrowser messages:\n  ' + errors.join('\n  '));
+  console.log(`\n   OK  ${rel(pdfPath)}\n`);
 }
 
-main().catch(e => { console.error(e.message || e); process.exit(1); });
+// A failed run removes its half-written folder so builds/ only holds finished builds.
+let failedBuildDir = null;
+main().catch(e => {
+  if (failedBuildDir) fs.rmSync(failedBuildDir, { recursive: true, force: true });
+  console.error(`\nerror: ${e.message || e}`);
+  process.exit(1);
+});

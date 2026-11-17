@@ -1,4 +1,4 @@
-.PHONY: build install clean
+.PHONY: build install clean help
 
 # Diagram source: excalidraw (default; Mermaid for diagrams with no Excalidraw version) or mermaid
 DIAGRAMS ?= excalidraw
@@ -14,5 +14,9 @@ node_modules: package.json
 
 install: node_modules
 
+help:
+	@node tools/build-pdf.mjs --help
+
+# Removes the per-run build folders (the latest PDFs in published/ stay)
 clean:
-	rm -rf published/agentic-pdlc.html published/agentic-pdlc.md published/agentic-pdlc.pdf published/diagrams
+	rm -rf published/builds

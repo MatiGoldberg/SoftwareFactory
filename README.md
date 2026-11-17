@@ -24,29 +24,60 @@ Note: the tools use absolute paths from the original workspace (`/mnt/project-fi
 
 ## Building the PDF
 
-One command rebuilds the whole document into `published/agentic-pdlc.pdf`:
-
 ```bash
-make build        # or ./build.sh, or npm install && npm run build
+make build                     # default: Excalidraw figures where they exist
+make build DIAGRAMS=mermaid    # every diagram from Mermaid
+make help                      # all options
 ```
 
-**Prerequisites:** Node.js 18 or later and npm. The first run installs the npm packages (`marked`, `mermaid`, `@excalidraw/utils`, `playwright`) and downloads Playwright's headless Chromium (`npx playwright install chromium`). After that the build runs offline in about 10 seconds. To use a Chromium you already have, set `CHROMIUM_PATH=/path/to/chromium`.
+The same options work on the script directly: `node tools/build-pdf.mjs --diagrams mermaid` (or `-d mermaid`, `--diagrams=mermaid`), `./build.sh -d mermaid`, or `npm run build -- --diagrams=mermaid`. Note the extra `--` with npm: without it npm keeps the option for itself, and the build stops with an error that says so.
 
-What it does (`tools/build-pdf.mjs`):
+**Prerequisites:** Node.js 18 or later and npm. The first `make build` runs `npm install` and `npx playwright install chromium`; after that the build runs offline in about 10 seconds. To use a Chromium you already have, set `CHROMIUM_PATH=/path/to/chromium`.
 
-1. Assembles `document/sections/*.md` in document order: Part 0, I, II.1 to II.12 (under a Part II heading), III, IV, V.1 and V.2 (under a Part V heading), VI, VII, then Appendices A, B (`document/references.md`), C, D (with D1 placed before D2) and E. Per-section "Open gaps" lists are dropped because Appendix C collects them, matching the Claude Doc. The order lives in the `ORDER` list at the top of the script.
-2. Picks one version of each diagram (see "Choosing the diagram source" below). In the default mode it renders the Excalidraw files to SVG, splitting multi-panel files into their panels, and puts each panel where its Mermaid twin was.
-3. Renders the remaining Mermaid blocks, adds a cover page (build date and commit) and a table of contents, and prints an A4 PDF with page numbers and PDF bookmarks.
+### Options
+
+| Option | Values | Meaning |
+|---|---|---|
+| `-d`, `--diagrams` | `excalidraw` (default), `mermaid` | Which version of each diagram goes in (see below). Also read from the `DIAGRAMS` environment variable. |
+| `-h`, `--help` | | Prints usage and exits. |
+
+The arguments are strict: an unknown option, a wrong-case option (`--DIAGRAMS`), a missing or unknown value, a repeated option or a stray argument stops the build with exit code 2, an error message and the usage text.
+
+### Output: one folder per run
+
+Every run writes a new folder and never overwrites an earlier one:
+
+```
+published/
+  agentic-pdlc.pdf                      latest excalidraw-mode build (stable name, committed)
+  agentic-pdlc-mermaid.pdf              latest mermaid-mode build (stable name, committed)
+  builds/                               not committed (.gitignore); `make clean` removes it
+    2026-11-17_043436_6287a93_excalidraw/
+      agentic-pdlc_2026-11-17_043436_excalidraw.pdf
+      agentic-pdlc_2026-11-17_043436_excalidraw.md     assembled Markdown
+      agentic-pdlc_2026-11-17_043436_excalidraw.html
+      diagrams/*.svg                                   rendered Excalidraw panels
+```
+
+The folder name is the local date and time, the commit, and the mode; a second run in the same second gets a `-2` suffix. A failed run deletes its half-written folder. The PDF cover page shows the build date and commit, and says "with local edits" when `document/` has uncommitted changes. To publish a revision, run `make build` and commit the updated `published/agentic-pdlc.pdf`.
+
+### Steps
+
+The console shows a banner and one traced line per step, with timings:
+
+1. **Check inputs:** every section file in the document order, the Excalidraw files and the npm packages exist.
+2. **Start headless Chromium.**
+3. **Render Excalidraw figures** (excalidraw mode only): multi-panel `.excalidraw` files are cropped into their panels and exported to SVG.
+4. **Assemble sections** in document order: Part 0, I, II.1 to II.12 (under a Part II heading), III, IV, V.1 and V.2 (under a Part V heading), VI, VII, then Appendices A, B (`document/references.md`), C, D (with D1 placed before D2) and E. Per-section "Open gaps" lists are dropped because Appendix C collects them, matching the Claude Doc. The order is the `ORDER` list at the top of `tools/build-pdf.mjs`.
+5. **Render HTML and Mermaid diagrams.** Fails if any Mermaid block or image does not render.
+6. **Print PDF:** A4, cover page, table of contents, page numbers and PDF bookmarks.
+7. **Publish latest copy** to the stable name above.
 
 ### Choosing the diagram source
 
-Twelve of the 37 diagrams exist twice: as a Mermaid block in a section and as a hand-drawn Excalidraw panel in `document/diagrams/`. The build includes exactly one version of each:
+Twelve of the 37 Mermaid blocks also exist as hand-drawn Excalidraw panels in `document/diagrams/`. The build includes exactly one version of each diagram:
 
-| Mode | Command | What goes in the PDF |
-|---|---|---|
-| `excalidraw` (default) | `make build` | The 11 Excalidraw figures (0.4 uber chart, II.2 ×2, II.9 ×2, III ×2, V.1 ×3, V.2) replace their 12 Mermaid twins (the uber chart covers both 0.4 charts); the other 25 diagrams stay Mermaid. |
-| `mermaid` | `make build DIAGRAMS=mermaid` | All 37 diagrams from Mermaid; no Excalidraw. |
+- **`excalidraw`** (default): 11 Excalidraw figures replace those 12 Mermaid blocks (0.4 uber chart, II.2 ×2, II.9 ×2, III ×2, V.1 ×3, V.2; the one Excalidraw uber chart covers both 0.4 charts). The other 25 diagrams stay Mermaid.
+- **`mermaid`**: all 37 diagrams from Mermaid; no Excalidraw.
 
-The same flag works as `./build.sh --diagrams=mermaid`, `npm run build -- --diagrams=mermaid` or the `DIAGRAMS` environment variable. The pairing of Excalidraw panels to Mermaid blocks, including the crop box for each panel, is the `FIGURES` list in `tools/build-pdf.mjs`. If you add a Mermaid block before an existing one in those six sections, update the block numbers there; the build fails if a listed block no longer exists.
-
-The build fails if a Mermaid block does not render, a figure anchor is missing, or an image fails to load. To publish a revision: edit the section files, run `make build`, and commit `published/` with your changes.
+The pairing of Excalidraw panels to Mermaid blocks, with each panel's crop box, is the `FIGURES` list in `tools/build-pdf.mjs`. If you add a Mermaid block ahead of an existing one in those six sections, update the block numbers there; the build fails if a listed block no longer exists.
