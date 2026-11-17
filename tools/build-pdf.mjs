@@ -5,11 +5,12 @@
 //   node tools/build-pdf.mjs [--diagrams excalidraw|mermaid] [--help]
 //
 // Steps (each is traced on the console):
-//   1. Check inputs          5. Render HTML and Mermaid diagrams
-//   2. Start headless Chromium  6. Print PDF
-//   3. Render Excalidraw figures (excalidraw mode only)
-//   4. Assemble document/sections/*.md in document order (ORDER below)
-//   7. Copy the PDF to its stable "latest" name
+//   1. Check inputs                 5. Render HTML, fonts and Mermaid diagrams
+//   2. Start headless Chromium      6. Print PDF (two passes, for contents page numbers)
+//   3. Render Excalidraw figures    7. Add running headers, page numbers and metadata
+//   4. Assemble sections (ORDER)    8. Copy the PDF to its stable "latest" name
+//
+// Look and feel: assets/theme.css, assets/logo.svg, assets/fonts/ (see README).
 //
 // Each run writes to its own folder, published/builds/<date>_<time>_<commit>_<mode>/,
 // so earlier builds are never overwritten.
@@ -22,12 +23,24 @@ import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
 import { chromium } from 'playwright';
+import { PDFDocument, PDFName, PDFDict, PDFArray, PDFRef, rgb } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DOC = path.join(ROOT, 'document');
 const OUT = path.join(ROOT, 'published');
 const OUT_NAME = 'agentic-pdlc';
 const TITLE = 'The Agentic PDLC: building a software factory around a high-scale service';
+const SHORT_TITLE = TITLE.split(':')[0];
+
+// Look and feel. The theme (colours, fonts, headings, tables, callouts) is
+// assets/theme.css; the cover logo is assets/logo.svg (a logo.png there is used
+// instead when no logo.svg exists). Fonts are bundled in assets/fonts/.
+const ASSETS = path.join(ROOT, 'assets');
+const THEME = path.join(ASSETS, 'theme.css');
+const LOGO = ['logo.svg', 'logo.png'].map(f => path.join(ASSETS, f)).find(f => fs.existsSync(f)) || path.join(ASSETS, 'logo.svg');
+// Header and footer text is drawn onto the printed PDF with these (TrueType, so they can be subset).
+const STAMP_FONTS = { regular: 'Inter-Regular.ttf', semibold: 'Inter-SemiBold.ttf', bold: 'Inter-Bold.ttf' };
 
 // ---------------------------------------------------------------------------
 // Document order. `file` is relative to document/. `demote` pushes every
@@ -293,70 +306,199 @@ function serve() {
 // ---------------------------------------------------------------------------
 function slug(s) { return s.toLowerCase().replace(/<[^>]+>/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 
-function toHtml(md, meta) {
+// Callout boxes. Markdown convention: a blockquote whose first paragraph starts
+// with one of these bold labels, e.g. "> **Takeaway:** text". Other blockquotes
+// render as plain quotes.
+const CALLOUTS = {
+  Takeaway: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1.3 1.7 1.4 2.5h5.2c.1-.8.6-1.7 1.4-2.5A6 6 0 0 0 12 3z"/></svg>',
+  Note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  Tip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
+  Warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>',
+};
+const CALLOUT_RE = new RegExp(`^<p><strong>(${Object.keys(CALLOUTS).join('|')}):</strong>\\s*`);
+
+// "Part II: The PDLC reference model" -> label + title (Part and appendix openers)
+function splitPart(text) {
+  const m = text.match(/^((?:Part|Appendix)\s+[0-9IVX]+|Appendix\s+[A-Z])\s*:\s*(.+)$/);
+  return m ? { lbl: m[1], title: m[2] } : { lbl: '', title: text };
+}
+// "II.2 Requirements" / "0.1 Executive summary" / "D3 AGENTS.md template" -> number + title
+function splitNumber(html) {
+  const m = html.match(/^((?:[0-9]+|[IVX]+)(?:\.[0-9]+)+|[A-Z][0-9]{1,2})\s+(.+)$/s);
+  return m ? { num: m[1], rest: m[2] } : { num: '', rest: html };
+}
+const plain = s => s.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+
+function toHtml(md, meta, mode) {
   const toc = [];
   const used = new Set();
+  const counts = Object.fromEntries(Object.keys(CALLOUTS).map(k => [k, 0]));
   const renderer = new marked.Renderer();
   renderer.code = ({ text, lang }) => {
     if (lang === 'mermaid') return `<div class="mermaid-wrap"><pre class="mermaid">${escapeHtml(text)}</pre></div>`;
     return `<pre><code>${escapeHtml(text)}</code></pre>`;
   };
+  renderer.blockquote = function ({ tokens }) {
+    const inner = this.parser.parse(tokens);
+    const m = inner.match(CALLOUT_RE);
+    if (!m) return `<blockquote>${inner}</blockquote>\n`;
+    counts[m[1]]++;
+    return `<aside class="callout ${m[1].toLowerCase()}"><div class="callout-title">${CALLOUTS[m[1]]}${m[1]}</div>${inner.replace(CALLOUT_RE, '<p>')}</aside>\n`;
+  };
   renderer.heading = function ({ tokens, depth, text }) {
     const inner = this.parser.parseInline(tokens);
     let id = slug(text); while (used.has(id)) id += '-x'; used.add(id);
-    if (depth === 2 || depth === 3) toc.push({ depth, id, inner });
-    return `<h${depth} id="${id}">${inner}</h${depth}>\n`;
+    let html = inner, cls = '', data = '';
+    if (depth === 2) {
+      const { lbl, title } = splitPart(plain(inner));
+      if (lbl) html = `<span class="lbl">${lbl}<span class="sep">: </span></span>${escapeHtml(title)}`;
+      data = ` data-lbl="${escapeAttr(lbl)}" data-title="${escapeAttr(title)}"`;
+      toc.push({ depth, id, lbl, inner: lbl ? escapeHtml(title) : inner });
+    } else if (depth === 3) {
+      const { num, rest } = splitNumber(inner);
+      if (num) html = `<span class="num">${num}</span>${rest}`;
+      if (/^(II|V)\.\d+$/.test(num)) cls = ' class="stage"';
+      data = ` data-title="${escapeAttr(plain(inner))}"`;
+      toc.push({ depth, id, num, inner: num ? rest : inner });
+    }
+    return `<h${depth} id="${id}"${cls}${data}>${html}</h${depth}>\n`;
   };
-  const body = marked.parse(md, { renderer, gfm: true });
-  const tocHtml = toc.map(t => `<li class="toc-${t.depth}"><a href="#${t.id}">${t.inner}</a></li>`).join('\n');
-  return `<!doctype html>
+  const body = marked.parse(md, { renderer, gfm: true })
+    // "Figure: caption" -> styled label
+    .replace(/<figcaption>Figure:\s*/g, '<figcaption><b>Figure</b>');
+  const tocHtml = toc.map(t => {
+    const lead = t.depth === 2 ? (t.lbl ? `<span class="lbl">${t.lbl}</span>` : '') : (t.num ? `<span class="num">${t.num}</span>` : '');
+    return `<li class="toc-${t.depth}"><a href="#${t.id}"><span class="t">${lead}${t.inner}</span><span class="dots"></span><span class="pg" data-for="${t.id}">000</span></a></li>`;
+  }).join('\n');
+  const css = fs.readFileSync(THEME, 'utf8');
+  const [main, ...sub] = TITLE.split(':');
+  const subtitle = sub.join(':').trim();
+  const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>${TITLE}</title>
 <style>
-  @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
-  html { font-size: 10.5pt; }
-  body { font-family: "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", sans-serif; color: #1b1b1b; line-height: 1.45; margin: 0; }
-  .cover { height: 250mm; display: flex; flex-direction: column; justify-content: center; page-break-after: always; }
-  .cover h1 { font-size: 28pt; line-height: 1.15; margin: 0 0 12mm; }
-  .cover .meta { color: #555; font-size: 11pt; }
-  nav.toc { page-break-after: always; }
-  nav.toc ul { list-style: none; padding: 0; columns: 1; }
-  nav.toc li.toc-2 { font-weight: 600; margin-top: 6px; }
-  nav.toc li.toc-3 { margin-left: 16px; font-size: 9.5pt; }
-  nav.toc a { color: inherit; text-decoration: none; }
-  h2 { font-size: 18pt; margin: 0 0 10px; padding-top: 4px; border-bottom: 2px solid #2b5797; page-break-before: always; }
-  h3 { font-size: 13.5pt; margin: 18px 0 6px; color: #2b5797; page-break-after: avoid; }
-  h4 { font-size: 11.5pt; margin: 14px 0 4px; page-break-after: avoid; }
-  h5, h6 { font-size: 10.5pt; margin: 10px 0 4px; }
-  /* Part II and V: their first stage heading follows the Part heading on the same page */
-  h2 + p + h3 { page-break-before: auto; }
-  p, li { orphans: 3; widows: 3; }
-  table { border-collapse: collapse; width: 100%; margin: 8px 0 12px; font-size: 8.8pt; page-break-inside: auto; }
-  tr { page-break-inside: avoid; }
-  th, td { border: 1px solid #c8c8c8; padding: 3px 5px; vertical-align: top; text-align: left; }
-  th { background: #eef2f8; }
-  td { overflow-wrap: anywhere; }
-  code { font-family: "Cascadia Code", Consolas, "Liberation Mono", monospace; font-size: 0.88em; background: #f3f3f3; padding: 0 2px; }
-  pre { background: #f6f6f6; border: 1px solid #e2e2e2; padding: 6px 8px; font-size: 8pt; white-space: pre-wrap; overflow-wrap: anywhere; }
-  pre code { background: none; padding: 0; font-size: inherit; }
-  a { color: #2b5797; }
-  .mermaid-wrap { page-break-inside: avoid; margin: 10px 0; text-align: center; }
-  pre.mermaid { background: none; border: none; padding: 0; font-size: 10pt; white-space: pre; }
-  pre.mermaid svg { max-width: 100% !important; height: auto; max-height: 235mm; }
-  figure.excalidraw { page-break-inside: avoid; margin: 12px 0; text-align: center; }
-  figure.excalidraw img { max-width: 100%; max-height: 225mm; }
-  figcaption { font-size: 9pt; color: #555; margin-top: 4px; font-style: italic; }
+${css}
 </style></head>
 <body>
-<section class="cover"><h1>${TITLE}</h1>
-<div class="meta">Built ${meta.date} from commit ${meta.commit}<br>Source: github.com/MatiGoldberg/SoftwareFactory</div></section>
-<nav class="toc"><h1 style="font-size:18pt">Contents</h1><ul>${tocHtml}</ul></nav>
+<section class="cover">
+  <div class="band">
+    <div class="kicker">Software Factory</div>
+    <h1>${escapeHtml(main)}<span class="sub">${escapeHtml(subtitle.charAt(0).toUpperCase() + subtitle.slice(1))}</span></h1>
+  </div>
+  <div class="art"><img src="/${path.relative(ROOT, LOGO).split(path.sep).join('/')}" alt="logo"></div>
+  <div class="meta">
+    <div class="brand">SOFTWARE<span>FACTORY</span></div>
+    <div class="build">Built ${meta.date} from commit <code>${escapeHtml(meta.commit)}</code><br>Diagrams: ${mode}<br>github.com/MatiGoldberg/SoftwareFactory</div>
+  </div>
+</section>
+<nav class="toc"><h1>Contents</h1><ul>${tocHtml}</ul></nav>
 <main>
 ${body}
 </main>
 </body></html>`;
+  return { html, callouts: counts };
 }
 
 function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function escapeAttr(s) { return escapeHtml(s).replace(/"/g, '&quot;'); }
+
+// Mermaid colours follow the theme: deep blue nodes and lines, orange for agents
+// (the sections' own classDef colours still apply). Font size stays Mermaid's
+// default 16px, the size tools/validate.js checks readability against.
+const MERMAID_THEME = {
+  fontFamily: 'Inter, sans-serif', fontSize: '16px',
+  primaryColor: '#EAF0F8', primaryBorderColor: '#1F4E8C', primaryTextColor: '#0B2D5B',
+  secondaryColor: '#FDF1E6', secondaryBorderColor: '#E8710A', tertiaryColor: '#F5F8FC', tertiaryBorderColor: '#B8C7DC',
+  lineColor: '#3D5F8C', textColor: '#1D2633', mainBkg: '#EAF0F8', nodeBorder: '#1F4E8C',
+  clusterBkg: '#F5F8FC', clusterBorder: '#B8C7DC', titleColor: '#0B2D5B', edgeLabelBackground: '#FFFFFF',
+  actorBkg: '#EAF0F8', actorBorder: '#1F4E8C', noteBkgColor: '#FDF1E6', noteBorderColor: '#E8710A',
+};
+// A diagram moves to a landscape page when that prints it at least this many times larger.
+const LANDSCAPE_GAIN = 1.25;
+
+// Reads Chromium's PDF bookmarks (one per heading, in document order) and
+// returns the 0-based page each heading landed on. Strict: the bookmarks must
+// match the HTML headings one for one.
+async function headingPages(bytes, headings) {
+  const doc = await PDFDocument.load(bytes);
+  const pageIndex = new Map(doc.getPages().map((p, i) => [p.ref.toString(), i]));
+  const marks = [];
+  const walk = node => {
+    for (let it = node.lookup(PDFName.of('First')); it instanceof PDFDict; it = it.lookup(PDFName.of('Next'))) {
+      let dest = it.lookup(PDFName.of('Dest'));
+      if (!dest) dest = it.lookup(PDFName.of('A'))?.lookup(PDFName.of('D'));
+      const ref = dest instanceof PDFArray ? dest.get(0) : null;
+      marks.push({ title: it.lookup(PDFName.of('Title'))?.decodeText() ?? '', page: ref instanceof PDFRef ? pageIndex.get(ref.toString()) : undefined });
+      walk(it);
+    }
+  };
+  const outline = doc.catalog.lookup(PDFName.of('Outlines'));
+  if (outline instanceof PDFDict) walk(outline);
+  if (marks.length !== headings.length) throw new Error(`PDF has ${marks.length} bookmarks for ${headings.length} headings; cannot place running headers`);
+  const norm = s => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ''); // bookmarks carry rendered text (case, hidden separators)
+  return headings.map((h, i) => {
+    if (norm(marks[i].title) !== norm(h.text)) throw new Error(`bookmark ${i + 1} is "${marks[i].title}", expected heading "${h.text.trim()}"`);
+    if (marks[i].page === undefined) throw new Error(`bookmark "${marks[i].title}" points at no page`);
+    return { ...h, page: marks[i].page };
+  });
+}
+
+// Running header (Part on the left, section on the right, hairline below) and
+// footer (short title, page number) on every page but the cover. Part and
+// appendix opening pages get only the page number.
+function stampPages(doc, layout, font) {
+  const MM = 72 / 25.4;
+  const NAVY = rgb(0x0B / 255, 0x2D / 255, 0x5B / 255), ORANGE = rgb(0xE8 / 255, 0x71 / 255, 0x0A / 255);
+  const MUTED = rgb(0x5B / 255, 0x67 / 255, 0x78 / 255), RULE = rgb(0xD5 / 255, 0xDC / 255, 0xE6 / 255);
+  const h2s = layout.filter(h => h.tag === 'H2'), h3s = layout.filter(h => h.tag === 'H3');
+  const openers = new Set(h2s.map(h => h.page));
+  const firstBody = h2s.length ? h2s[0].page : Infinity;
+  const fit = (text, f, size, max) => {
+    if (f.widthOfTextAtSize(text, size) <= max) return text;
+    while (text.length > 1 && f.widthOfTextAtSize(text + '…', size) > max) text = text.slice(0, -1);
+    return text.trimEnd() + '…';
+  };
+  let headers = 0, numbers = 0;
+  doc.getPages().forEach((pg, i) => {
+    if (i === 0) return; // cover
+    const { width, height } = pg.getSize();
+    const x0 = 20 * MM, x1 = width - 20 * MM;
+    // Footer: short title left, page number right with a small orange tick
+    const num = String(i + 1), ns = 8.5;
+    const nw = font.bold.widthOfTextAtSize(num, ns);
+    pg.drawText(num, { x: x1 - nw, y: 11 * MM, size: ns, font: font.bold, color: NAVY });
+    pg.drawRectangle({ x: x1 - nw - 3.2 * MM, y: 11 * MM + 0.2 * MM, width: 2 * MM, height: 2.2 * MM, color: ORANGE });
+    pg.drawText(SHORT_TITLE, { x: x0, y: 11 * MM, size: 7.5, font: font.regular, color: MUTED });
+    numbers++;
+    if (openers.has(i)) return;
+    // Header
+    let lbl = '', left, right = '';
+    if (i < firstBody) left = 'Contents';
+    else {
+      const ch = h2s.filter(h => h.page <= i).pop();
+      lbl = ch.lbl ? ch.lbl.toUpperCase() : '';
+      left = ch.title;
+      const sec = h3s.find(h => h.page === i && h.idx > ch.idx) || h3s.filter(h => h.page < i && h.idx > ch.idx).pop();
+      right = sec ? sec.title : '';
+    }
+    const y = height - 13 * MM, size = 7.5;
+    let x = x0;
+    if (lbl) {
+      pg.drawText(lbl, { x, y, size, font: font.bold, color: ORANGE });
+      x += font.bold.widthOfTextAtSize(lbl + '   ', size);
+    }
+    const leftMax = (x1 - x0) * 0.5 - (x - x0);
+    const leftText = fit(left, font.semibold, size, leftMax);
+    pg.drawText(leftText, { x, y, size, font: font.semibold, color: NAVY });
+    if (right) {
+      const rightMax = (x1 - x0) - (x - x0) - font.semibold.widthOfTextAtSize(leftText, size) - 8 * MM;
+      const rt = fit(right, font.regular, size, rightMax);
+      pg.drawText(rt, { x: x1 - font.regular.widthOfTextAtSize(rt, size), y, size, font: font.regular, color: MUTED });
+    }
+    pg.drawLine({ start: { x: x0, y: y - 2.4 * MM }, end: { x: x1, y: y - 2.4 * MM }, thickness: 0.5, color: RULE });
+    headers++;
+  });
+  return { headers, numbers };
+}
 
 function gitMeta() {
   const date = new Date().toISOString().slice(0, 10);
@@ -402,9 +544,9 @@ async function main() {
   console.log(BANNER);
   console.log(`\n   diagrams: ${mode}   commit: ${meta.commit}   output: ${rel(buildDir)}/`);
 
-  const step = tracer(7);
+  const step = tracer(8);
   const errors = [];
-  let server, browser, page, base, md, pdfPath;
+  let server, browser, page, base, md, pdfPath, pdfBytes, layout;
 
   await step('Check inputs', async log => {
     const files = ORDER.flatMap(o => [o.file, o.insertBeforeHeading?.file].filter(Boolean));
@@ -414,11 +556,17 @@ async function main() {
         if (!fs.existsSync(path.join(DOC, 'diagrams', d + '.excalidraw'))) missing.push(`diagrams/${d}.excalidraw`);
       }
     }
-    if (missing.length) { throw new Error('missing input files:\n  ' + missing.map(m => 'document/' + m).join('\n  ')); }
-    for (const dep of ['marked', 'mermaid', '@excalidraw/utils', 'playwright']) {
+    const assets = [THEME, LOGO, ...Object.values(STAMP_FONTS).map(f => path.join(ASSETS, 'fonts', f))];
+    if (fs.existsSync(THEME)) {
+      for (const m of fs.readFileSync(THEME, 'utf8').matchAll(/url\("?\/([^")]+)"?\)/g)) assets.push(path.join(ROOT, m[1]));
+    }
+    missing.push(...[...new Set(assets)].filter(f => !fs.existsSync(f)).map(f => '../' + rel(f)));
+    if (missing.length) { throw new Error('missing input files:\n  ' + missing.map(m => path.normalize('document/' + m)).join('\n  ')); }
+    for (const dep of ['marked', 'mermaid', '@excalidraw/utils', 'playwright', 'pdf-lib', '@pdf-lib/fontkit']) {
       if (!fs.existsSync(path.join(ROOT, 'node_modules', dep))) throw new Error(`missing npm package ${dep}; run "npm install" (or "make install")`);
     }
     log(`${files.length} section files, ${mode === 'excalidraw' ? new Set(FIGURES.map(f => f.diagram)).size + ' Excalidraw files' : 'no Excalidraw (mermaid mode)'}`);
+    log(`theme ${rel(THEME)}, logo ${rel(LOGO)}, ${new Set(assets).size - 2} font files`);
   });
 
   try {
@@ -474,12 +622,17 @@ async function main() {
       log(`${ORDER.length} parts, ~${Math.round(words / 1000)}k words -> ${baseName}.md`);
     });
 
-    await step('Render HTML and Mermaid diagrams', async log => {
-      fs.writeFileSync(path.join(buildDir, `${baseName}.html`), toHtml(md, meta));
+    await step('Render HTML, fonts and Mermaid diagrams', async log => {
+      const { html, callouts } = toHtml(md, meta, mode);
+      fs.writeFileSync(path.join(buildDir, `${baseName}.html`), html);
       await page.goto(`${base}/${rel(buildDir).split(path.sep).join('/')}/${baseName}.html`, { waitUntil: 'load' });
-      const r = await page.evaluate(async (base) => {
+      const r = await page.evaluate(async ({ base, themeVariables, ratio }) => {
+        // Load every bundled font face before Mermaid measures any text.
+        const fontErrors = [];
+        await Promise.all([...document.fonts].map(f => f.load().catch(() => fontErrors.push(`${f.family} ${f.weight} ${f.style}`))));
+        await document.fonts.ready;
         const { default: mermaid } = await import(base + '/node_modules/mermaid/dist/mermaid.esm.min.mjs');
-        mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose', flowchart: { htmlLabels: true, useMaxWidth: true } });
+        mermaid.initialize({ startOnLoad: false, theme: 'base', themeVariables, securityLevel: 'loose', flowchart: { htmlLabels: true, useMaxWidth: true } });
         const nodes = [...document.querySelectorAll('pre.mermaid')];
         const failed = [];
         for (const [i, n] of nodes.entries()) {
@@ -487,30 +640,74 @@ async function main() {
         }
         await Promise.all([...document.images].map(img => img.complete ? null : new Promise(r => { img.onload = img.onerror = r; })));
         const brokenImages = [...document.images].filter(img => !img.naturalWidth).map(img => img.getAttribute('src'));
-        return { total: nodes.length, rendered: document.querySelectorAll('pre.mermaid svg').length, figures: document.querySelectorAll('figure.excalidraw img').length, failed, brokenImages };
-      }, base);
+        // Landscape: a diagram gets its own landscape page when that prints it
+        // at least `ratio` times larger than the portrait column would.
+        const PX = 96 / 25.4;
+        const portrait = { w: 170 * PX, h: 225 * PX }, land = { w: 257 * PX, h: 152 * PX };
+        const landscape = [];
+        for (const el of document.querySelectorAll('main .mermaid-wrap, main figure.excalidraw')) {
+          const svg = el.querySelector('svg'), img = el.querySelector('img');
+          let w, h;
+          if (svg) { const vb = svg.viewBox.baseVal; w = vb.width; h = vb.height; } else if (img) { w = img.naturalWidth; h = img.naturalHeight; }
+          if (!w || !h) continue;
+          const sp = Math.min(1, portrait.w / w, portrait.h / h), sl = Math.min(1, land.w / w, land.h / h);
+          if (sl >= sp * ratio) {
+            el.classList.add('landscape');
+            const sec = [...document.querySelectorAll('main h2, main h3')].filter(hd => hd.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING).pop();
+            landscape.push(`${(sec?.dataset.title || sec?.textContent || '').replace(/\s+/g, ' ').slice(0, 40)} (${Math.round(w)}x${Math.round(h)}, ${Math.round(sl / sp * 100)}% larger)`);
+          }
+        }
+        return {
+          total: nodes.length, rendered: document.querySelectorAll('pre.mermaid svg').length,
+          figures: document.querySelectorAll('figure.excalidraw img').length, failed, brokenImages, fontErrors,
+          fonts: [...document.fonts].filter(f => f.status === 'loaded').length, landscape,
+        };
+      }, { base, themeVariables: MERMAID_THEME, ratio: LANDSCAPE_GAIN });
+      if (r.fontErrors.length) throw new Error('fonts failed to load: ' + r.fontErrors.join(', '));
       if (r.failed.length) throw new Error('Mermaid failures:\n  ' + r.failed.join('\n  '));
       if (r.brokenImages.length) throw new Error('images failed to load: ' + r.brokenImages.join(', '));
       if (r.rendered !== r.total) throw new Error(`only ${r.rendered} of ${r.total} Mermaid blocks rendered`);
+      log(`${r.fonts} font faces loaded`);
       log(`${r.rendered} Mermaid diagrams + ${r.figures} Excalidraw figures = ${r.rendered + r.figures} diagrams`);
+      log(`${r.landscape.length} on landscape pages${r.landscape.length ? ':' : ''}`);
+      for (const l of r.landscape) log(`  - ${l}`);
+      log(`callouts: ${Object.entries(callouts).map(([k, v]) => `${v} ${k}`).join(', ')}`);
     });
 
-    await step('Print PDF', async log => {
+    await step('Print PDF (two passes: layout, then contents page numbers)', async log => {
       await page.emulateMedia({ media: 'print' });
+      const opts = { preferCSSPageSize: true, printBackground: true, outline: true, tagged: true };
+      const headings = await page.evaluate(() => [...document.querySelectorAll('h1, h2, h3, h4, h5, h6')].map((h, idx) => ({
+        idx, tag: h.tagName, id: h.id, text: h.textContent, lbl: h.dataset.lbl || '', title: h.dataset.title || h.textContent.trim(),
+      })));
+      const pass1 = await page.pdf(opts);
+      const first = await headingPages(pass1, headings);
+      await page.evaluate(pages => {
+        for (const el of document.querySelectorAll('.pg[data-for]')) el.textContent = pages[el.dataset.for];
+      }, Object.fromEntries(first.map(h => [h.id, h.page + 1])));
+      const pass2 = await page.pdf(opts);
+      layout = await headingPages(pass2, headings);
+      const moved = layout.filter((h, i) => h.page !== first[i].page);
+      if (moved.length) throw new Error(`filling in the contents page numbers moved ${moved.length} headings, e.g. "${moved[0].title}"`);
+      pdfBytes = pass2;
+      log(`${headings.length} headings placed; contents page numbers filled in, layout unchanged`);
+    });
+
+    await step('Add running headers, page numbers and metadata', async log => {
       pdfPath = path.join(buildDir, `${baseName}.pdf`);
-      await page.pdf({
-        path: pdfPath,
-        format: 'A4',
-        printBackground: true,
-        displayHeaderFooter: true,
-        headerTemplate: '<div></div>',
-        footerTemplate: `<div style="font-size:8px;color:#777;width:100%;padding:0 16mm;display:flex;justify-content:space-between;"><span>${TITLE.split(':')[0]}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
-        margin: { top: '18mm', bottom: '18mm', left: '16mm', right: '16mm' },
-        outline: true,
-        tagged: true,
-      });
-      const pages = (fs.readFileSync(pdfPath, 'latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
-      log(`${pages} pages, ${(fs.statSync(pdfPath).size / 1024 / 1024).toFixed(1)} MB -> ${rel(pdfPath)}`);
+      const doc = await PDFDocument.load(pdfBytes);
+      doc.registerFontkit(fontkit);
+      const font = {};
+      for (const [k, f] of Object.entries(STAMP_FONTS)) font[k] = await doc.embedFont(fs.readFileSync(path.join(ASSETS, 'fonts', f)), { subset: true });
+      const stamped = stampPages(doc, layout, font);
+      doc.setTitle(TITLE, { showInWindowTitleBar: true });
+      doc.setSubject(`Built ${meta.date} from commit ${meta.commit}; diagrams: ${mode}`);
+      doc.setCreator('tools/build-pdf.mjs (github.com/MatiGoldberg/SoftwareFactory)');
+      fs.writeFileSync(pdfPath, await doc.save());
+      const n = doc.getPageCount();
+      const land = doc.getPages().filter(p => p.getWidth() > p.getHeight()).length;
+      log(`${stamped.headers} running headers, ${stamped.numbers} page numbers (cover unnumbered, Part openers without header)`);
+      log(`${n} pages (${land} landscape), ${(fs.statSync(pdfPath).size / 1024 / 1024).toFixed(1)} MB -> ${rel(pdfPath)}`);
     });
   } finally {
     if (browser) await browser.close();

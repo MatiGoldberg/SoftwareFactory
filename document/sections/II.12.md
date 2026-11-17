@@ -41,7 +41,7 @@ Key metrics: share of in-scope consumers migrated, end-to-end time saved includi
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** agents write the edits and propose the scope, while discovery, sharding, verification, the merge gate and the tracker stay deterministic. Act, then notify applies only to allow-listed mechanical classes.
+> **Takeaway:** **Recommendation, in one line:** agents write the edits and propose the scope, while discovery, sharding, verification, the merge gate and the tracker stay deterministic. Act, then notify applies only to allow-listed mechanical classes.
 
 ```mermaid
 flowchart TD

@@ -41,7 +41,7 @@ Other references: OpenAI versions execution plans in the repo with progress and 
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** agents draft the spec, checks and plan; owners approve and freeze the checks, and the implementing agent can never weaken them. Start both agents at Prepare (L1).
+> **Takeaway:** **Recommendation, in one line:** agents draft the spec, checks and plan; owners approve and freeze the checks, and the implementing agent can never weaken them. Start both agents at Prepare (L1).
 
 The constitution, the ready-gate script, the owner approvals, the version tag and the contract lint stay deterministic; agents write inputs to them and never approve.
 

@@ -2,7 +2,7 @@
 
 The owner's question was about a service that is "highly complex, and built out of microservices in different repos, in different architectures, deployed through different pipelines on different clusters", with service-to-service (S2S) trust to overcome and several owning teams. Part II handles each at the stage where it bites; this part adds depth only where Part II is thin, mainly identity (IV.4).
 
-The message of this part: heterogeneity is acceptable as long as every repo, pipeline and cluster meets the same three contracts: owners and dependencies from the service catalog, one set of deterministic gates, and identity from Entra with no stored secrets.
+> **Takeaway:** The message of this part: heterogeneity is acceptable as long as every repo, pipeline and cluster meets the same three contracts: owners and dependencies from the service catalog, one set of deterministic gates, and identity from Entra with no stored secrets.
 
 ```mermaid
 flowchart TD

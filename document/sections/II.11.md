@@ -41,7 +41,7 @@ Key metrics: time to detect and mitigate, repeat-incident rate, repair-item clos
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** the SRE agent investigates from the first page and prepares the runbook mitigation, earning Act, then notify one action at a time; a postmortem agent drafts repair items; a published rule sets severity, and humans own incident command and closure.
+> **Takeaway:** **Recommendation, in one line:** the SRE agent investigates from the first page and prepares the runbook mitigation, earning Act, then notify one action at a time; a postmortem agent drafts repair items; a published rule sets severity, and humans own incident command and closure.
 
 Alert rules, paging, severity, runbook steps and repair-item tracking stay deterministic. **Recommendation:** the agent first correlates everything that changed (config, flags, infrastructure), as one vendor talk also urges [AIE14].
 

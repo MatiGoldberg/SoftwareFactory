@@ -99,7 +99,7 @@ Each box shows the highest rung reached in that window; L3* applies only to the 
 
 **Recommendation:** use two layers. The first is the four DORA delivery metrics: deployment frequency, lead time for changes, change failure rate and time to restore service. The second is the trust ledger for each agent action: success rate, revert rate, escaped defects, human override rate and cost per accepted change, with human review hours in the cost (see III.2).
 
-**Recommendation:** report lead time for changes and change failure rate quarterly against the Step 0 baseline. The plan is working when lead time falls each quarter while change failure rate holds at or below baseline. That is "faster and faster" in a form a sponsor can check.
+> **Takeaway:** **Recommendation:** report lead time for changes and change failure rate quarterly against the Step 0 baseline. The plan is working when lead time falls each quarter while change failure rate holds at or below baseline. That is "faster and faster" in a form a sponsor can check.
 
 Do not report vanity metrics such as PR counts, lines of code or adoption rates (evidence on usage metrics in III.2). In an interview, Shopify's head of engineering gives a "humble estimate" of about 20% productivity, explicitly not measured in lines of code or PRs, with PR volume up slightly and the reversion rate roughly flat [SHOP1]. The embedded-software case names an "illusion of productivity" among its barriers [EMB1].
 

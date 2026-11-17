@@ -38,7 +38,7 @@ Other references: Microsoft Digital reports that its AI Work Item Assistant enfo
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** an agent grills the requirement owner and drafts a PRD that another agent can pick up, but the deterministic gate, not the agent, decides when it is clear; anything unresolved stays on an open-questions list. Start at Prepare (L1).
+> **Takeaway:** **Recommendation, in one line:** an agent grills the requirement owner and drafts a PRD that another agent can pick up, but the deterministic gate, not the agent, decides when it is clear; anything unresolved stays on an open-questions list. Start at Prepare (L1).
 
 The template, the completeness check, the sign-offs and the ready gate stay deterministic. The agent asks the questions and writes the input (the PRD); even at its highest rung it only submits the PRD to the ready gate, and it never approves its own output.
 

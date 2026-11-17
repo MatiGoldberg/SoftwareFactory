@@ -39,7 +39,7 @@ For the threat model, the published guidance (not a measured practice) gives the
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** agents critique the design, draft the contract, compatibility plan and threat model, and pre-check for breaking changes; the diff tool, the board, the design review and the design-approved gate stay deterministic or human, and no agent applies an approval label.
+> **Takeaway:** **Recommendation, in one line:** agents critique the design, draft the contract, compatibility plan and threat model, and pre-check for breaking changes; the diff tool, the board, the design review and the design-approved gate stay deterministic or human, and no agent applies an approval label.
 
 Design itself stays human: the .NET team found Copilot Coding Agent weaker at architecture [MS8]. But Microsoft built its AI reviewer partly because humans missed architecture and security issues [MS6], and the Azure SRE Agent team runs specialized security-review agents [MS9]. Anthropic separates the agent doing the work from the agent judging it, because agents "reliably skew positive" grading their own work [AN3]; the critique agent is that separate judge and drafts nothing.
 

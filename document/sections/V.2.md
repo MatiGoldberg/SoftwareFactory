@@ -1,6 +1,8 @@
 ## V.2 Factory reference architecture: the other components
 
-V.1 covers the service catalog. This section covers the other components: what each does, whether to adopt a Microsoft option or build it, a frontier reference, and the roadmap step (see III.4) by which it must exist. Most of the factory is deterministic plumbing. Agents sit at the edges and reach the core only through identity and two gateways.
+V.1 covers the service catalog. This section covers the other components: what each does, whether to adopt a Microsoft option or build it, a frontier reference, and the roadmap step (see III.4) by which it must exist.
+
+> **Takeaway:** Most of the factory is deterministic plumbing. Agents sit at the edges and reach the core only through identity and two gateways.
 
 ```mermaid
 %%{init: {"flowchart": {"nodeSpacing": 20, "rankSpacing": 12, "subGraphTitleMargin": {"top": 6, "bottom": 8}}}}%%
