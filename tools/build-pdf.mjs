@@ -8,7 +8,7 @@
 //      which follows document/00-skeleton.md and the published Claude Doc).
 //   2. Render every document/diagrams/*.excalidraw to SVG (published/diagrams/).
 //   3. Convert the Markdown to HTML; Mermaid blocks are rendered by Mermaid,
-//      Excalidraw figures are placed at the spots listed in FIGURES.
+//      Excalidraw panels replace their Mermaid twins (see DIAGRAMS / FIGURES).
 //   4. Print to PDF with headless Chromium: published/<OUT_NAME>.pdf
 //
 // Everything runs locally from node_modules; no network access is needed.
@@ -65,16 +65,65 @@ const ORDER = [
 // dropped from the sections (as in the Claude Doc).
 const STRIP_HEADINGS = ['Open gaps'];
 
-// Excalidraw figures: placed at the end of the subsection whose heading
-// starts with `after`, inside the section file `in`.
+// Diagram source. Several diagrams exist twice: as a Mermaid block in a
+// section and as a hand-drawn Excalidraw file. DIAGRAMS picks which version
+// goes into the PDF, so each diagram appears exactly once:
+//   excalidraw (default)  Excalidraw where a version exists; Mermaid for the rest
+//   mermaid               every diagram from its Mermaid block; no Excalidraw
+// Set it with `make build DIAGRAMS=mermaid`, `npm run build -- --diagrams=mermaid`
+// or the DIAGRAMS environment variable.
+const MODES = ['excalidraw', 'mermaid'];
+function diagramMode() {
+  const arg = process.argv.find(a => a.startsWith('--diagrams='));
+  const mode = (arg ? arg.split('=')[1] : process.env.DIAGRAMS || 'excalidraw').trim().toLowerCase();
+  const resolved = mode === 'auto' || mode === '' ? 'excalidraw' : mode;
+  if (!MODES.includes(resolved)) throw new Error(`Unknown diagram mode "${mode}". Use one of: ${MODES.join(', ')}`);
+  return resolved;
+}
+
+// Excalidraw panels and the Mermaid blocks they stand in for. `mermaid` lists
+// 1-based positions of ```mermaid blocks in the section file `in`; in
+// excalidraw mode the figure takes the place of the first listed block and the
+// others are dropped. `panel` crops one panel out of a multi-panel .excalidraw
+// file: elements whose centre lies inside the box are kept.
 const FIGURES = [
-  { diagram: '00-uber-chart', in: 'sections/0.md', after: '0.4 The uber chart', caption: 'The uber chart: the deterministic spine and the agent layer' },
-  { diagram: 'II.2-grilling-loop', in: 'sections/II.2.md', after: 'What to agentify', caption: 'II.2 Requirements: the grilling loop' },
-  { diagram: 'II.9-safe-deployment', in: 'sections/II.9.md', after: 'What to agentify', caption: 'II.9 Deploy: rings, bake and automatic halt' },
-  { diagram: 'III-trust-ladder', in: 'sections/III.md', after: 'III.4 The roadmap', caption: 'III: the autonomy ladder and the roadmap' },
-  { diagram: 'V.1-service-catalog', in: 'sections/V.1.md', after: 'The reverse dependency graph', caption: 'V.1 The service catalog and its reverse dependency graph' },
-  { diagram: 'V.2-reference-architecture', in: 'sections/V.2.md', after: 'Component map', caption: 'V.2 Component map' },
-];
+  { diagram: '00-uber-chart', in: 'sections/0.md', mermaid: [1, 2], caption: 'The uber chart: the deterministic spine with each stage’s agents and rungs' },
+  { diagram: 'II.2-grilling-loop', id: 'II.2-deterministic', in: 'sections/II.2.md', mermaid: [1], panel: { xMax: 950 }, caption: 'II.2 Requirements: deterministic flow' },
+  { diagram: 'II.2-grilling-loop', id: 'II.2-agentified', in: 'sections/II.2.md', mermaid: [2], panel: { xMin: 950 }, caption: 'II.2 Requirements: with the grilling agent' },
+  { diagram: 'II.9-safe-deployment', id: 'II.9-deterministic', in: 'sections/II.9.md', mermaid: [1], panel: { xMax: 1050 }, caption: 'II.9 Deploy: deterministic ring flow' },
+  { diagram: 'II.9-safe-deployment', id: 'II.9-agentified', in: 'sections/II.9.md', mermaid: [2], panel: { xMin: 1050 }, caption: 'II.9 Deploy: agentified' },
+  { diagram: 'III-trust-ladder', id: 'III-ladder', in: 'sections/III.md', mermaid: [1], panel: { yMax: 700 }, caption: 'III.1 The autonomy ladder' },
+  { diagram: 'III-trust-ladder', id: 'III-roadmap', in: 'sections/III.md', mermaid: [2], panel: { yMin: 700 }, caption: 'III.4 The roadmap' },
+  { diagram: 'V.1-service-catalog', id: 'V.1-model', in: 'sections/V.1.md', mermaid: [1], panel: { xMax: 1050, yMax: 700 }, caption: 'V.1 Catalog model' },
+  { diagram: 'V.1-service-catalog', id: 'V.1-reverse-lookup', in: 'sections/V.1.md', mermaid: [2], panel: { xMin: 1050, yMax: 700 }, caption: 'V.1 Reverse-dependency lookup' },
+  { diagram: 'V.1-service-catalog', id: 'V.1-upkeep', in: 'sections/V.1.md', mermaid: [3], panel: { yMin: 700 }, caption: 'V.1 Catalog upkeep with agents' },
+  { diagram: 'V.2-reference-architecture', in: 'sections/V.2.md', mermaid: [1], caption: 'V.2 Component map' },
+].map(f => ({ ...f, id: f.id || f.diagram }));
+
+// Replace (or keep) the Mermaid blocks of one section file according to mode.
+function applyDiagramMode(md, file, mode) {
+  const figs = FIGURES.filter(f => f.in === file);
+  if (!figs.length || mode === 'mermaid') return md;
+  const lines = md.split('\n');
+  const out = [];
+  let n = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (!/^\s*```mermaid\s*$/.test(lines[i])) { out.push(lines[i]); continue; }
+    n++;
+    let j = i + 1;
+    while (j < lines.length && !/^\s*```\s*$/.test(lines[j])) j++;
+    const fig = figs.find(f => f.mermaid.includes(n));
+    if (!fig) { out.push(...lines.slice(i, j + 1)); }
+    else if (fig.mermaid[0] === n) {
+      out.push(`<figure class="excalidraw" data-diagram="${fig.id}"><img src="diagrams/${fig.id}.svg" alt="${fig.caption}"><figcaption>Figure: ${fig.caption}</figcaption></figure>`);
+    }
+    i = j;
+  }
+  for (const f of figs) {
+    if (Math.max(...f.mermaid) > n) throw new Error(`${file} has ${n} Mermaid blocks; FIGURES entry ${f.id} expects block ${Math.max(...f.mermaid)}`);
+  }
+  return out.join('\n');
+}
 
 // ---------------------------------------------------------------------------
 // Markdown helpers (all fence-aware, so headings inside code blocks such as
@@ -114,19 +163,6 @@ function stripSections(md, names) {
   return out.join('\n');
 }
 
-// Insert `block` just before the first heading (at or above the matched
-// heading's level) that follows the heading starting with `after`.
-function insertAfterSubsection(md, after, block) {
-  const rows = scan(md.split('\n'));
-  const start = rows.find(r => r.heading && r.heading.text.startsWith(after));
-  if (!start) throw new Error(`Figure anchor not found: "${after}"`);
-  const end = rows.find(r => r.idx > start.idx && r.heading && r.heading.level <= start.heading.level);
-  const lines = md.split('\n');
-  const at = end ? end.idx : lines.length;
-  lines.splice(at, 0, '', block, '');
-  return lines.join('\n');
-}
-
 function insertBeforeHeading(md, headingPrefix, block) {
   const rows = scan(md.split('\n'));
   const hit = rows.find(r => r.heading && r.heading.text.startsWith(headingPrefix));
@@ -143,14 +179,11 @@ function read(rel) {
 // ---------------------------------------------------------------------------
 // 1. Assemble
 // ---------------------------------------------------------------------------
-function assemble() {
+function assemble(mode) {
   const parts = [];
   for (const item of ORDER) {
     let md = read(item.file);
-    for (const fig of FIGURES.filter(f => f.in === item.file)) {
-      md = insertAfterSubsection(md, fig.after,
-        `<figure class="excalidraw" data-diagram="${fig.diagram}"><img src="diagrams/${fig.diagram}.svg" alt="${fig.caption}"><figcaption>Figure: ${fig.caption}</figcaption></figure>`);
-    }
+    md = applyDiagramMode(md, item.file, mode);
     if (item.insertBeforeHeading) {
       const sub = item.insertBeforeHeading;
       let inner = read(sub.file);
@@ -264,7 +297,7 @@ function gitMeta() {
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
-  fs.mkdirSync(path.join(OUT, 'diagrams'), { recursive: true });
+  fs.mkdirSync(OUT, { recursive: true });
   const server = await serve();
   const base = `http://127.0.0.1:${server.address().port}`;
   const launch = { headless: true };
@@ -279,34 +312,39 @@ async function main() {
       if (m.type() === 'error' && !m.text().includes('Failed to use workers for subsetting')) errors.push(m.text());
     });
 
-    // 2. Excalidraw -> SVG
-    await page.goto(`${base}/package.json`);
-    const diagrams = fs.readdirSync(path.join(DOC, 'diagrams')).filter(f => f.endsWith('.excalidraw')).sort();
-    for (const f of diagrams) {
-      const scene = JSON.parse(fs.readFileSync(path.join(DOC, 'diagrams', f), 'utf8'));
-      const svg = await page.evaluate(async ({ scene, base }) => {
-        window.EXCALIDRAW_ASSET_PATH = base + '/node_modules/@excalidraw/utils/dist/prod/';
-        const ex = await import(base + '/node_modules/@excalidraw/utils/dist/prod/index.js');
-        const el = await ex.exportScene({
-          type: 'svg',
-          data: {
-            elements: scene.elements.filter(e => !e.isDeleted),
-            appState: { ...(scene.appState || {}), viewBackgroundColor: '#ffffff' },
-            files: scene.files || {},
-          },
-          config: { canvasBackgroundColor: '#ffffff', padding: 16, theme: 'light' },
-        });
-        return el.outerHTML;
-      }, { scene, base });
-      fs.writeFileSync(path.join(OUT, 'diagrams', f.replace(/\.excalidraw$/, '.svg')), svg);
-      console.log(`diagram  ${f} -> published/diagrams/${f.replace(/\.excalidraw$/, '.svg')}`);
-    }
-    for (const fig of FIGURES) {
-      if (!fs.existsSync(path.join(OUT, 'diagrams', fig.diagram + '.svg'))) throw new Error(`Missing diagram for figure: ${fig.diagram}`);
+    // 2. Excalidraw -> SVG, one file per figure (panel), only in excalidraw mode.
+    const mode = diagramMode();
+    console.log(`mode     DIAGRAMS=${mode}`);
+    fs.rmSync(path.join(OUT, 'diagrams'), { recursive: true, force: true });
+    if (mode === 'excalidraw') {
+      fs.mkdirSync(path.join(OUT, 'diagrams'), { recursive: true });
+      await page.goto(`${base}/package.json`);
+      for (const fig of FIGURES) {
+        const scene = JSON.parse(fs.readFileSync(path.join(DOC, 'diagrams', fig.diagram + '.excalidraw'), 'utf8'));
+        const p = { xMin: -Infinity, xMax: Infinity, yMin: -Infinity, yMax: Infinity, ...(fig.panel || {}) };
+        const inPanel = e => {
+          const cx = e.x + (e.width || 0) / 2, cy = e.y + (e.height || 0) / 2;
+          return cx >= p.xMin && cx < p.xMax && cy >= p.yMin && cy < p.yMax;
+        };
+        const elements = scene.elements.filter(e => !e.isDeleted && inPanel(e));
+        if (!elements.length) throw new Error(`Panel of ${fig.id} is empty; check its FIGURES panel box`);
+        const svg = await page.evaluate(async ({ elements, scene, base }) => {
+          window.EXCALIDRAW_ASSET_PATH = base + '/node_modules/@excalidraw/utils/dist/prod/';
+          const ex = await import(base + '/node_modules/@excalidraw/utils/dist/prod/index.js');
+          const el = await ex.exportScene({
+            type: 'svg',
+            data: { elements, appState: { ...(scene.appState || {}), viewBackgroundColor: '#ffffff' }, files: scene.files || {} },
+            config: { canvasBackgroundColor: '#ffffff', padding: 16, theme: 'light' },
+          });
+          return el.outerHTML;
+        }, { elements, scene, base });
+        fs.writeFileSync(path.join(OUT, 'diagrams', fig.id + '.svg'), svg);
+        console.log(`diagram  ${fig.diagram}.excalidraw${fig.panel ? ' (panel)' : ''} -> published/diagrams/${fig.id}.svg`);
+      }
     }
 
     // 1 + 3. Assemble and convert
-    const md = assemble();
+    const md = assemble(mode);
     fs.writeFileSync(path.join(OUT, `${OUT_NAME}.md`), md);
     const html = toHtml(md, gitMeta());
     const htmlPath = path.join(OUT, `${OUT_NAME}.html`);
@@ -326,7 +364,8 @@ async function main() {
       const brokenImages = [...document.images].filter(img => !img.naturalWidth).map(img => img.getAttribute('src'));
       return { total: nodes.length, rendered: document.querySelectorAll('pre.mermaid svg').length, failed, brokenImages };
     }, base);
-    console.log(`mermaid  ${mermaidResult.rendered}/${mermaidResult.total} blocks rendered`);
+    const figures = (md.match(/<figure class="excalidraw"/g) || []).length;
+    console.log(`mermaid  ${mermaidResult.rendered}/${mermaidResult.total} blocks rendered; excalidraw figures: ${figures}`);
     if (mermaidResult.failed.length) throw new Error('Mermaid failures:\n' + mermaidResult.failed.join('\n'));
     if (mermaidResult.brokenImages.length) throw new Error('Images failed to load: ' + mermaidResult.brokenImages.join(', '));
 

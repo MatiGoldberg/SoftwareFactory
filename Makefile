@@ -1,8 +1,11 @@
 .PHONY: build install clean
 
+# Diagram source: excalidraw (default; Mermaid for diagrams with no Excalidraw version) or mermaid
+DIAGRAMS ?= excalidraw
+
 # One command: install dependencies if needed, then build published/agentic-pdlc.pdf
 build: node_modules
-	npm run build
+	npm run build -- --diagrams=$(DIAGRAMS)
 
 node_modules: package.json
 	npm install

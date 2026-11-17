@@ -6,4 +6,4 @@ if [ ! -d node_modules ]; then
   npm install
   npx playwright install chromium
 fi
-npm run build
+npm run build -- "$@"   # e.g. ./build.sh --diagrams=mermaid

@@ -37,7 +37,7 @@
 </style></head>
 <body>
 <section class="cover"><h1>The Agentic PDLC: building a software factory around a high-scale service</h1>
-<div class="meta">Built 2026-11-16 from commit 5e895f6<br>Source: github.com/MatiGoldberg/SoftwareFactory</div></section>
+<div class="meta">Built 2026-11-17 from commit cbc3475<br>Source: github.com/MatiGoldberg/SoftwareFactory</div></section>
 <nav class="toc"><h1 style="font-size:18pt">Contents</h1><ul><li class="toc-2"><a href="#part-0-front-matter">Part 0: Front matter</a></li>
 <li class="toc-3"><a href="#0-1-executive-summary">0.1 Executive summary</a></li>
 <li class="toc-3"><a href="#0-2-how-to-read-this">0.2 How to read this</a></li>
@@ -221,51 +221,12 @@
 </ul>
 <h3 id="0-4-the-uber-chart">0.4 The uber chart</h3>
 <p>The first chart is the deterministic spine: every stage with the gate that decides it. Each Part II section zooms into one box (II.9, for example, is the Deploy box).</p>
-<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
-    subgraph PLAN["Plan"]
-        direction LR
-        P1(["II.1 Intake&lt;br/&gt;owner accepts"]) --&gt; P2(["II.2 Requirements&lt;br/&gt;PRD ready gate"]) --&gt; P3(["II.3 Spec&lt;br/&gt;checks frozen"])
-    end
-    subgraph BUILD["Design and build"]
-        direction LR
-        B1(["II.4 Design&lt;br/&gt;design approved"]) --&gt; B2(["II.5 Implement&lt;br/&gt;sandbox verifiers"]) --&gt; B3(["II.6 Review&lt;br/&gt;owner approval"])
-    end
-    subgraph SHIP["Verify and ship"]
-        direction LR
-        S1(["II.7 Test&lt;br/&gt;required tiers"]) --&gt; S2(["II.8 Merge&lt;br/&gt;risk tier, queue"]) --&gt; S3(["II.9 Deploy&lt;br/&gt;rings, bake, halt"])
-    end
-    subgraph RUN["Run and evolve"]
-        direction LR
-        R1(["II.10 Validate&lt;br/&gt;SLO ramp, criteria"]) --&gt; R2(["II.11 Monitor&lt;br/&gt;alerts, runbooks"]) --&gt; R3(["II.12 Maintain&lt;br/&gt;verified campaigns"])
-    end
-    PLAN --&gt; BUILD
-    BUILD --&gt; SHIP
-    SHIP --&gt; RUN</pre></div><p>Every box is deterministic or human; its second line names the gate that decides it. Repair items from II.11 and new signals feed back into II.1.</p>
-<p>The second chart is the same grid seen from the agent layer.</p>
-<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
-    subgraph PLAN["Plan"]
-        direction LR
-        A1(["II.1 Intake agents&lt;br/&gt;Act, then notify*&lt;br/&gt;owner accepts"]):::agent --&gt; A2(["II.2 Grilling agent&lt;br/&gt;Act on approval&lt;br/&gt;ready gate decides"]):::agent --&gt; A3(["II.3 Spec, planner&lt;br/&gt;Act on approval&lt;br/&gt;owners freeze checks"]):::agent
-    end
-    subgraph BUILD["Design and build"]
-        direction LR
-        A4(["II.4 Design agents&lt;br/&gt;Act, then notify*&lt;br/&gt;board approves"]):::agent --&gt; A5(["II.5 Coding agent&lt;br/&gt;Act on approval&lt;br/&gt;chores: L3*"]):::agent --&gt; A6(["II.6 AI reviewer&lt;br/&gt;Act, then notify*&lt;br/&gt;never approves"]):::agent
-    end
-    subgraph SHIP["Verify and ship"]
-        direction LR
-        A7(["II.7 Test agents&lt;br/&gt;Act on approval&lt;br/&gt;owner approves"]):::agent --&gt; A8(["II.8 Conflict, risk&lt;br/&gt;Act, then notify*&lt;br/&gt;gates decide"]):::agent --&gt; A9(["II.9 On-call/SRE&lt;br/&gt;Act, then notify*&lt;br/&gt;halt, LKG, flag off"]):::agent
-    end
-    subgraph RUN["Run and evolve"]
-        direction LR
-        A10(["II.10 Validation&lt;br/&gt;Act on approval&lt;br/&gt;owner verdict"]):::agent --&gt; A11(["II.11 SRE, postmortem&lt;br/&gt;Act, then notify*&lt;br/&gt;humans command"]):::agent --&gt; A12(["II.12 Migration&lt;br/&gt;Act, then notify*&lt;br/&gt;class gate decides"]):::agent
-    end
-    PLAN --&gt; BUILD
-    BUILD --&gt; SHIP
-    SHIP --&gt; RUN
-    classDef agent fill:#fde7c8,stroke:#d9822b,color:#111</pre></div><p>Orange boxes are each stage&#39;s agents, their highest rung today and what still decides; * (or L3*) means Act, then notify only for narrow, reversible or mechanical classes (see III.1), with the rest of that stage at Act on approval or lower.</p>
-<p><strong>How to read it.</strong> Work flows through the spine in the first chart, and no orange box replaces a gate: agents feed the spine and read its outputs. At Act, then notify a change lands because the deterministic gates pass, not because the agent decided. Feature code, tests, validation and rollout plans stop at Act on approval; the Act, then notify rows in II.2 and II.3, II.6&#39;s opt-in low-risk class (approved by the deterministic risk gate) and the II.9 and II.11 runbook actions are our proposals; Autonomous within budget is a future proposal everywhere. The service catalog (see V.1) and the trust ledger (see III.2) sit under every box.</p>
-<figure class="excalidraw" data-diagram="00-uber-chart"><img src="diagrams/00-uber-chart.svg" alt="The uber chart: the deterministic spine and the agent layer"><figcaption>Figure: The uber chart: the deterministic spine and the agent layer</figcaption></figure>
+<figure class="excalidraw" data-diagram="00-uber-chart"><img src="diagrams/00-uber-chart.svg" alt="The uber chart: the deterministic spine with each stage’s agents and rungs"><figcaption>Figure: The uber chart: the deterministic spine with each stage’s agents and rungs</figcaption></figure>
 
+<p>Every box is deterministic or human; its second line names the gate that decides it. Repair items from II.11 and new signals feed back into II.1.</p>
+<p>The second chart is the same grid seen from the agent layer.</p>
+<p>Orange boxes are each stage&#39;s agents, their highest rung today and what still decides; * (or L3*) means Act, then notify only for narrow, reversible or mechanical classes (see III.1), with the rest of that stage at Act on approval or lower.</p>
+<p><strong>How to read it.</strong> Work flows through the spine in the first chart, and no orange box replaces a gate: agents feed the spine and read its outputs. At Act, then notify a change lands because the deterministic gates pass, not because the agent decided. Feature code, tests, validation and rollout plans stop at Act on approval; the Act, then notify rows in II.2 and II.3, II.6&#39;s opt-in low-risk class (approved by the deterministic risk gate) and the II.9 and II.11 runbook actions are our proposals; Autonomous within budget is a future proposal everywhere. The service catalog (see V.1) and the trust ledger (see III.2) sit under every box.</p>
 <h3 id="0-5-real-world-systems-in-two-minutes">0.5 Real-world systems in two minutes</h3>
 <p><strong>Microsoft and GitHub</strong></p>
 <ul>
@@ -610,17 +571,9 @@
 <h4 id="purpose-x">Purpose</h4>
 <p>This stage turns an accepted intake item (see II.1) into an approved, testable product requirements document (PRD) that a spec writer or an agent can pick up without asking anyone. If the PRD is vague, every later stage multiplies the ambiguity. Agents can make this worse by filling gaps with plausible assumptions instead of asking, as Spotify found (see below) [SPOT5].</p>
 <h4 id="the-ideal-deterministic-process-x">The ideal deterministic process</h4>
-<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
-    DR["Intake item: owner&lt;br/&gt;drafts PRD from template"] --&gt; LINT(["Completeness check"])
-    LINT --&gt; D1["Dependency&lt;br/&gt;owners sign"]
-    LINT --&gt; D2["Privacy sign-off&lt;br/&gt;if data tagged"]
-    LINT --&gt; D3["SRE signs&lt;br/&gt;SLO and rollout"]
-    D1 --&gt; RFS(["Ready for spec gate"])
-    D2 --&gt; RFS
-    D3 --&gt; RFS
-    RFS --&gt; OUT["Approved PRD to II.3"]
-    LINT -. "missing fields" .-&gt; DR
-    RFS -. "open questions" .-&gt; DR</pre></div><p>Gates in the chart:</p>
+<figure class="excalidraw" data-diagram="II.2-deterministic"><img src="diagrams/II.2-deterministic.svg" alt="II.2 Requirements: deterministic flow"><figcaption>Figure: II.2 Requirements: deterministic flow</figcaption></figure>
+
+<p>Gates in the chart:</p>
 <ul>
 <li><strong>Completeness check.</strong> A template linter. Required fields (our template, enforced by REQ-PRD-03; template: D1): problem and user, acceptance criteria written as observable checks, non-goals, a named accountable owner, dependencies (services and the teams that own them, read from the service catalog, see V.1), SLO impact, data classification, and rollout constraints (rings, flags, two-phase needs; see II.9).</li>
 <li><strong>Sign-offs.</strong> Each dependency owner confirms what the PRD assumes about their service. Privacy and compliance sign off when the data classification requires it. SRE confirms the SLO and rollout constraints.</li>
@@ -636,18 +589,9 @@
 <p>The template, the completeness check, the sign-offs and the ready gate stay deterministic. The agent asks the questions and writes the input (the PRD); even at its highest rung it only submits the PRD to the ready gate, and it never approves its own output.</p>
 <p><strong>When grilling stops.</strong> &quot;Clear&quot; has a mechanical definition: the draft passes the completeness lint and every acceptance criterion is an observable check. The agent stops asking when that holds, or when each remaining unknown is written on the open-questions list with a named person to answer it.</p>
 <p>The chart shows the agent at Prepare and Act on approval; the table gives all five rungs.</p>
-<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
-    IN["Intake item"] --&gt; GA["Grilling agent"]:::agent
-    CTX["Context layer:&lt;br/&gt;catalog, incidents, docs"] --&gt; GA
-    GA -- "asks" --&gt; OWN["Requirement owner"]
-    OWN -- "answers" --&gt; GA
-    GA -- "routes dependency&lt;br/&gt;questions" --&gt; DEP["Dependency owners"]
-    GA -- "submits" --&gt; PRD["Draft PRD +&lt;br/&gt;open questions"]
-    PRD --&gt; GATE(["Lint, sign-offs,&lt;br/&gt;ready gate"])
-    DEP -- "answers = sign-off" --&gt; GATE
-    GATE -. "open questions" .-&gt; GA
-    GATE --&gt; OUT["Approved PRD to II.3"]
-    classDef agent fill:#fde7c8,stroke:#d9822b,color:#111</pre></div><p>Orange box is the agent; everything else is the deterministic core.</p>
+<figure class="excalidraw" data-diagram="II.2-agentified"><img src="diagrams/II.2-agentified.svg" alt="II.2 Requirements: with the grilling agent"><figcaption>Figure: II.2 Requirements: with the grilling agent</figcaption></figure>
+
+<p>Orange box is the agent; everything else is the deterministic core.</p>
 <p>Spotify&#39;s dataset migration shows the failure mode: given a human migration guide, Honk &quot;was left to make assumptions about how to map from one dataset field to another that were often incorrect&quot; [SPOT5]. <strong>Recommendation:</strong> the agent reads the context layer before asking (see REQ-CTX-02), so its questions are specific: having read a past incident, it asks &quot;What should happen to in-flight requests when the flag turns off?&quot; rather than &quot;Any edge cases?&quot; (illustrative). It ends with a list of open questions, never with silent assumptions.</p>
 <table>
 <thead>
@@ -696,8 +640,6 @@
 </tr>
 </tbody></table>
 <p><strong>Recommendation:</strong> measure the clarification rate on agent-drafted versus human-drafted PRDs before promoting. [GAP: no source measures whether interview-driven specs reduce clarification or rework; all the rungs above are synthesis.]</p>
-<figure class="excalidraw" data-diagram="II.2-grilling-loop"><img src="diagrams/II.2-grilling-loop.svg" alt="II.2 Requirements: the grilling loop"><figcaption>Figure: II.2 Requirements: the grilling loop</figcaption></figure>
-
 <h4 id="enterprise-complications-x">Enterprise complications</h4>
 <ul>
 <li><strong>Requirements that span teams, and who answers.</strong> A feature touching three services has three owners, and the requirement owner cannot speak for a dependency they do not own. The service catalog maps services to repos and owners [MS28]. <strong>Recommendation:</strong> the agent routes those questions to the dependency owner and records the answer as that owner&#39;s sign-off; unanswered questions block the ready gate. [GAP: no source describes a requirements stage negotiating across owning teams before work starts.]</li>
@@ -1898,18 +1840,9 @@
 <h4 id="purpose-x-x-x-x-x-x-x-x">Purpose</h4>
 <p>This stage moves a merged change (code, config, feature flag or IaC) into production in rings, and stops it automatically when health turns bad. It zooms into the Deploy box of the overview chart (0.4). It is the backstop for every earlier stage: &quot;Some defects will reach production.&quot; [GOOG5]. Because agents raise change volume, the pipeline must stay deterministic and policy-driven.</p>
 <h4 id="the-ideal-deterministic-process-x-x-x-x-x-x-x-x">The ideal deterministic process</h4>
-<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
-    IN["Merged change"] --&gt; EG(["Entry gate"])
-    EG --&gt; RINGS
-    subgraph RINGS["Rings, each held for bake"]
-        direction LR
-        R1["Canary"] --&gt; R2["Pilot"] --&gt; R3["Region waves"] --&gt; DONE["Done"]
-    end
-    RINGS -.-&gt; W(["Watchdog verdict"])
-    W -- no-go --&gt; HALT["Halt + incident"]
-    HALT --&gt; POL(["Rollback policy covers it?"])
-    POL -- yes --&gt; AUTO["Roll back to LKG"]
-    POL -- no --&gt; DEC["On-call picks: rollback,&lt;br/&gt;flag off, or fix forward"]</pre></div><p>The rings are Azure&#39;s [MS5]; canary regions belong to the Early Updates Access Program, and the pilot adds hardware diversity [MS2]. Gates in the chart:</p>
+<figure class="excalidraw" data-diagram="II.9-deterministic"><img src="diagrams/II.9-deterministic.svg" alt="II.9 Deploy: deterministic ring flow"><figcaption>Figure: II.9 Deploy: deterministic ring flow</figcaption></figure>
+
+<p>The rings are Azure&#39;s [MS5]; canary regions belong to the Early Updates Access Program, and the pilot adds hardware diversity [MS2]. Gates in the chart:</p>
 <ul>
 <li><strong>Entry gate.</strong> Every touched component has registered health signals [MS4], and rollback is tested with upgrade-downgrade tests [AWS3] (see II.7).</li>
 <li><strong>Bake gate.</strong> In Azure&#39;s Safe Deployment Practices (SDP), policies, not developers, set bake times, and the tooling and processes &quot;intentionally sacrifice velocity&quot; [MS2]. Microsoft&#39;s ADO guidance suggests about 24 hours in general [MS1]. A ring is promoted only if all indicators stay green through bake, and it halts on any end-user-impacting alert [MS3].</li>
@@ -1928,13 +1861,9 @@
 <p>The rings, bake policy and watchdog verdict stay deterministic. Gandalf-style analytics belong to that core: an automated, policy-enforced gate (ML-based, but not an agent). The watchdog only stops the rollout it blames. Choosing and running the mitigation, and handling alarms the watchdog does not attribute (during the 30-day watch, or from customer reports), is on-call work, and that is what the agent takes over, rung by rung. A second agent writes the rollout plan as an input.</p>
 <p>Azure SRE Agent, generally available since March 2026, is Microsoft&#39;s AI operations teammate: it loads a team&#39;s code, logs, metrics and tools, investigates incidents, and lets teams choose between recommended actions and automated responses &quot;within defined guardrails&quot; [MS10]. Meta&#39;s on-call agent work says &quot;Grant autonomy action by action.&quot; and keeps production mitigations human [AIE4]. [GAP: no source describes an agent halting or rolling back a ring rollout, or writing a rollout plan.]</p>
 <p>The chart shows the lowest and highest everyday rungs; the table gives all five.</p>
-<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
-    RPA["Rollout-plan agent"]:::agent -- "drafts plan" --&gt; PIPE["Rings + bake"]
-    PIPE --&gt; WD(["Watchdog verdict"]) -- no-go --&gt; H["Halt, policy rollback"]
-    H -- "alert + evidence" --&gt; SRE["On-call / SRE agent"]:::agent
-    SRE -- "Advise" --&gt; HUM["On-call human"]
-    SRE -. "Act, then notify:&lt;br/&gt;halt, LKG, flag off" .-&gt; PIPE
-    classDef agent fill:#fde7c8,stroke:#d9822b,color:#111</pre></div><p>Orange boxes are agents; everything else is the deterministic core.</p>
+<figure class="excalidraw" data-diagram="II.9-agentified"><img src="diagrams/II.9-agentified.svg" alt="II.9 Deploy: agentified"><figcaption>Figure: II.9 Deploy: agentified</figcaption></figure>
+
+<p>Orange boxes are agents; everything else is the deterministic core.</p>
 <table>
 <thead>
 <tr>
@@ -1996,8 +1925,6 @@
 </tr>
 </tbody></table>
 <p><strong>Recommendation:</strong> emergency acceleration is never agentic; it needs defined approvers and criteria [MS3].</p>
-<figure class="excalidraw" data-diagram="II.9-safe-deployment"><img src="diagrams/II.9-safe-deployment.svg" alt="II.9 Deploy: rings, bake and automatic halt"><figcaption>Figure: II.9 Deploy: rings, bake and automatic halt</figcaption></figure>
-
 <h4 id="enterprise-complications-x-x-x-x-x-x-x-x">Enterprise complications</h4>
 <ul>
 <li><strong>Heterogeneous pipelines and clusters.</strong> Azure DevOps and GitHub Actions run side by side, AKS beside App Service. Azure SDP sets policy centrally [MS2], and Microsoft&#39;s ADO guidance asks for the same deployment tooling in dev, test and prod [MS1]. Fleet sequences only Kubernetes and node-image upgrades on AKS, not application or flag rollouts. [GAP: no source shows one watchdog halting two pipeline systems.]</li>
@@ -2679,14 +2606,9 @@
 <td>Future proposal only: a fix-forward shipped through the normal pipeline (II.9)</td>
 </tr>
 </tbody></table>
-<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
-    L0["Advise (L0)"] -- "ledger evidence" --&gt; L1["Prepare (L1)"]
-    L1 -- "ledger evidence" --&gt; L2["Act on approval (L2)"]
-    L2 -- "ledger evidence" --&gt; L3["Act, then notify (L3)"]
-    L3 -- "trigger demotes" --&gt; L2
-    L3 -.-&gt; L4["Autonomous within budget (L4)"]
-    classDef future fill:#eeeeee,stroke:#999,color:#555,stroke-dasharray: 4 3
-    class L4 future</pre></div><p>Arrows move one action, not one agent; a demotion trigger drops an action one rung from any level. The grey box is a future proposal; no Part II stage recommends it today.</p>
+<figure class="excalidraw" data-diagram="III-ladder"><img src="diagrams/III-ladder.svg" alt="III.1 The autonomy ladder"><figcaption>Figure: III.1 The autonomy ladder</figcaption></figure>
+
+<p>Arrows move one action, not one agent; a demotion trigger drops an action one rung from any level. The grey box is a future proposal; no Part II stage recommends it today.</p>
 <p><strong>Two principles hold on every rung.</strong></p>
 <ul>
 <li><strong>Deterministic core, agentic edges.</strong> Builds, verifiers, the ready gates, the merge queue, risk thresholds, ring promotion, bake and the watchdog verdict stay deterministic and policy-driven (see II.8, II.9). Agents write inputs to them (PRDs, specs, code, tests, rollout plans), interpret their outputs (investigation, triage) and take bounded mitigations.</li>
@@ -2805,25 +2727,11 @@
 <td>Few rejected items; repeat incidents fall [GAP]</td>
 </tr>
 </tbody></table>
-<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
-    subgraph A["Phase A: foundations"]
-        direction LR
-        S0["Step 0&lt;br/&gt;Ready L1"] --&gt; S1["Step 1&lt;br/&gt;Tests L2"] --&gt; S2["Step 2&lt;br/&gt;Review L3*"] --&gt; S3["Step 3&lt;br/&gt;Migrate L3*"]
-    end
-    subgraph B["Phase B: new behaviour"]
-        direction LR
-        S4["Step 4&lt;br/&gt;Spec L2"] --&gt; S5["Step 5&lt;br/&gt;Spec to PR L2"]
-    end
-    subgraph C["Phase C: production loop"]
-        direction LR
-        S6["Step 6&lt;br/&gt;Rollout L2"] --&gt; S7["Step 7&lt;br/&gt;SRE agent L3*"] --&gt; S8["Step 8&lt;br/&gt;Closed loop L2"]
-    end
-    A -- "ledger evidence" --&gt; B
-    B -- "ledger evidence" --&gt; C</pre></div><p>Each box shows the highest rung any action reaches at that step; L3* means only for blocking findings in proven review categories (Step 2), allow-listed mechanical classes (Step 3) or promoted single-service actions (Step 7). Every phase needs the trust-ledger record of the one before it.</p>
+<figure class="excalidraw" data-diagram="III-roadmap"><img src="diagrams/III-roadmap.svg" alt="III.4 The roadmap"><figcaption>Figure: III.4 The roadmap</figcaption></figure>
+
+<p>Each box shows the highest rung any action reaches at that step; L3* means only for blocking findings in proven review categories (Step 2), allow-listed mechanical classes (Step 3) or promoted single-service actions (Step 7). Every phase needs the trust-ledger record of the one before it.</p>
 <p><strong>Exit criteria.</strong> <strong>Recommendation:</strong> a step is done when its promotion metric holds over the owner&#39;s sample and its actions are recorded in D6 at their rung; the next step starts only then. The 0 to 180 day plan in Part VI maps these steps to time.</p>
 <p>Two warnings shape the pace. Review becomes the bottleneck: Google says &quot;The bottleneck in the process was the speed at which engineers could review the changes.&quot; [GOOG2], and Spotify saw &quot;76% more PRs to review&quot; [SPOT2]. And cost needs its own signal: Shopify routes all AI traffic through a central proxy and treats a token-spend alert at $250 per person per day as a reason to investigate, not to shut down [SHOP1] (an interview). <strong>Recommendation:</strong> track cost per accepted change from Step 0, through the gateway, and count human review hours in it.</p>
-<figure class="excalidraw" data-diagram="III-trust-ladder"><img src="diagrams/III-trust-ladder.svg" alt="III: the autonomy ladder and the roadmap"><figcaption>Figure: III: the autonomy ladder and the roadmap</figcaption></figure>
-
 <h3 id="requirements-x-x-x-x-x-x-x-x-x-x-x-x">Requirements</h3>
 <table>
 <thead>
@@ -3119,14 +3027,9 @@
 <p><strong>Backstage</strong> is the open-source developer portal Spotify created. Per its docs, the catalog is built from descriptor YAML files in each repo: &quot;The source of truth for the components in your software catalog are metadata YAML files stored in source control&quot; [SPOT8]. Entities declare owners, <code>dependsOn</code>, and provided and consumed APIs [SPOT9]. Spotify&#39;s chief architect said in a 2026 conference talk that Backstage exposes ownership and docs to agents through MCP and a CLI [SPOT2].</p>
 <p><strong>OWNERS files</strong> at Google list owners per directory, and an owner of each touched directory must approve every change [GOOG8]. A 2023 GitHub engineering blog post describes SERVICEOWNERS, which maps every file in GitHub&#39;s monolith to a service and generates CODEOWNERS from it [GH3].</p>
 <h4 id="what-it-stores">What it stores</h4>
-<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
-    TEAM["Team&lt;br/&gt;owners, on-call"] -- owns --&gt; SVC["Service&lt;br/&gt;tier, SLOs, intake"]
-    SVC -- "has part" --&gt; CMP["Component&lt;br/&gt;repo, AGENTS.md"]
-    CMP -. "depends on" .-&gt; CMP
-    CMP -- "provides,&lt;br/&gt;consumes" --&gt; API["API contract&lt;br/&gt;versions"]
-    CMP -- "reads, writes" --&gt; DS["Data store&lt;br/&gt;classification"]
-    PIPE["Pipeline&lt;br/&gt;rings, envs"] -- deploys --&gt; CMP
-    PIPE -- targets --&gt; CL["Cluster or&lt;br/&gt;resource group"]</pre></div><p>Components declare <code>dependsOn</code> other components; reverse edges are computed (next section).</p>
+<figure class="excalidraw" data-diagram="V.1-model"><img src="diagrams/V.1-model.svg" alt="V.1 Catalog model"><figcaption>Figure: V.1 Catalog model</figcaption></figure>
+
+<p>Components declare <code>dependsOn</code> other components; reverse edges are computed (next section).</p>
 <table>
 <thead>
 <tr>
@@ -3175,21 +3078,15 @@
 <p><strong>Recommendation:</strong> the change-intake path (&quot;how to ask this team for a change&quot;) is a machine-readable address, not prose: the team&#39;s work queue (an ADO area path, or a GitHub repo and label), a request template, and the expected response time. Agents that need another team&#39;s change, such as the grilling agent (II.2) or a coordinated migration (IV.1), file a request there instead of messaging people, and it is tracked like any work item.</p>
 <h4 id="the-reverse-dependency-graph-for-change-management">The reverse dependency graph for change management</h4>
 <p>Per the Backstage docs, descriptors may not contain hand-written relations. Processors derive them from each entity&#39;s forward fields and always emit inverse pairs (<code>dependsOn</code>/<code>dependencyOf</code>, <code>consumesApi</code>/<code>apiConsumedBy</code>) [SPOT9]. For change management, this lookup replaces the hand-written impact assessment in a change record:</p>
-<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
-    CH["PR changes API v2"] --&gt; Q(["Reverse lookup:&lt;br/&gt;consumers, transitive"])
-    Q --&gt; C1["Consumers&lt;br/&gt;and owners"]
-    Q --&gt; C2["Blast radius&lt;br/&gt;by tier"]
-    C1 --&gt; N["Notify, collect acks,&lt;br/&gt;open migration PRs"]
-    C1 --&gt; O["Merge and release&lt;br/&gt;order, upstream first"]
-    C2 --&gt; R["Risk score input&lt;br/&gt;(see II.8)"]</pre></div><p>Published uses of the graph:</p>
+<figure class="excalidraw" data-diagram="V.1-reverse-lookup"><img src="diagrams/V.1-reverse-lookup.svg" alt="V.1 Reverse-dependency lookup"><figcaption>Figure: V.1 Reverse-dependency lookup</figcaption></figure>
+
+<p>Published uses of the graph:</p>
 <ul>
 <li><strong>Consumers and owners.</strong> Spotify used Backstage endpoint lineage to get the consumer list and owners before migrating about 1,800 downstream pipelines [SPOT5]. Google&#39;s Rosie, its tool for splitting a large-scale change into per-owner pieces, &quot;shards it based upon project boundaries and ownership rules&quot; [GOOG6].</li>
 <li><strong>Order.</strong> mabl, a 25-engineer vendor, reports a coordination graph across 79 repos that prescribes release order, upstream first (vendor-reported) [MABL1].</li>
 <li><strong>Blast radius.</strong> InfoQ reports that Netflix built a runtime topology for blast-radius analysis and change management [NFLX1].</li>
 </ul>
 <p><strong>Recommendation:</strong> feed the transitive consumer count, weighted by tier, into the risk score (see II.8). [GAP: no source uses a reverse dependency graph as a risk-model input.]</p>
-<figure class="excalidraw" data-diagram="V.1-service-catalog"><img src="diagrams/V.1-service-catalog.svg" alt="V.1 The service catalog and its reverse dependency graph"><figcaption>Figure: V.1 The service catalog and its reverse dependency graph</figcaption></figure>
-
 <h4 id="keeping-it-current">Keeping it current</h4>
 <p>The published answer is to derive facts, not declare them, and to make stale entries fail something.</p>
 <ul>
@@ -3203,17 +3100,9 @@
 <h4 id="what-to-agentify-and-how-far-x-x-x-x-x-x-x-x-x-x-x-x">What to agentify, and how far</h4>
 <p><strong>Recommendation, in one line:</strong> only providers and merged PRs write the catalog; agents keep it current by proposing diffs with every change and triaging drift, and a stale entry lowers every agent&#39;s autonomy on that service.</p>
 <p>The reconciler and CI validation are deterministic. Owners approve ownership and classification changes; allowed-action changes also need governance, and no agent edits its own allowed actions (see D6). Realistic ceiling today is Act on approval (L2).</p>
-<div class="mermaid-wrap"><pre class="mermaid">flowchart TD
-    SRC["Repos, pipelines,&lt;br/&gt;Entra, Resource Graph"] --&gt; PROV["Providers"]
-    PR["Change PR"] --&gt; CUR["Catalog-curator agent"]:::agent
-    TRAF["Runtime traffic,&lt;br/&gt;resource changes"] --&gt; REC(["Reconciler"])
-    REC -- "drift items" --&gt; DRI["Drift-triage agent"]:::agent
-    CUR -- "catalog diff" --&gt; GATE(["CI validation,&lt;br/&gt;owner approval"])
-    DRI -- "fix PR" --&gt; GATE
-    PROV --&gt; CAT["Catalog"]
-    REC -- "drift status" --&gt; CAT
-    GATE --&gt; CAT
-    classDef agent fill:#fde7c8,stroke:#d9822b,color:#111</pre></div><p>Orange boxes are agents; everything else is the deterministic core.</p>
+<figure class="excalidraw" data-diagram="V.1-upkeep"><img src="diagrams/V.1-upkeep.svg" alt="V.1 Catalog upkeep with agents"><figcaption>Figure: V.1 Catalog upkeep with agents</figcaption></figure>
+
+<p>Orange boxes are agents; everything else is the deterministic core.</p>
 <table>
 <thead>
 <tr>
@@ -3359,30 +3248,9 @@
 </tbody></table>
 <h3 id="v-2-factory-reference-architecture-the-other-components">V.2 Factory reference architecture: the other components</h3>
 <p>V.1 covers the service catalog. This section covers the other components: what each does, whether to adopt a Microsoft option or build it, a frontier reference, and the roadmap step (see III.4) by which it must exist. Most of the factory is deterministic plumbing. Agents sit at the edges and reach the core only through identity and two gateways.</p>
-<div class="mermaid-wrap"><pre class="mermaid">%%{init: {"flowchart": {"nodeSpacing": 20, "rankSpacing": 12, "subGraphTitleMargin": {"top": 6, "bottom": 8}}}}%%
-flowchart TD
-    subgraph EDGE["Agents, in sandboxes"]
-        direction LR
-        A1["Spec and&lt;br/&gt;coding agents"]:::agent ~~~ A2["Review and&lt;br/&gt;test agents"]:::agent ~~~ A3["On-call/SRE&lt;br/&gt;agent"]:::agent
-    end
-    EDGE --&gt; BND
-    subgraph BND["Boundary: every call"]
-        direction LR
-        MGW["Model&lt;br/&gt;gateway"] ~~~ IDN["Identity&lt;br/&gt;Entra Agent ID"] ~~~ TGW["Tool/MCP&lt;br/&gt;gateway"]
-    end
-    BND --&gt; CORE
-    subgraph CORE["Deterministic core"]
-        subgraph PATH["Change path"]
-            direction LR
-            CP["Control&lt;br/&gt;plane"] --&gt; VER["Verifiers"] --&gt; MQ["Risk score,&lt;br/&gt;merge queue"] --&gt; DEP["Deployment&lt;br/&gt;orchestrator"]
-        end
-        subgraph SHARED["Shared services"]
-            direction LR
-            CTX["Context&lt;br/&gt;layer"] ~~~ FLG["Flags,&lt;br/&gt;config"] ~~~ WD["Watchdog,&lt;br/&gt;incidents"] ~~~ LED["Trust ledger,&lt;br/&gt;audit"]
-        end
-        PATH ~~~ SHARED
-    end
-    classDef agent fill:#fde7c8,stroke:#d9822b,color:#111</pre></div><p>Orange boxes are agents; everything below the boundary is deterministic. The watchdog halts the deployment orchestrator and opens incidents, and every component writes to the trust ledger.</p>
+<figure class="excalidraw" data-diagram="V.2-reference-architecture"><img src="diagrams/V.2-reference-architecture.svg" alt="V.2 Component map"><figcaption>Figure: V.2 Component map</figcaption></figure>
+
+<p>Orange boxes are agents; everything below the boundary is deterministic. The watchdog halts the deployment orchestrator and opens incidents, and every component writes to the trust ledger.</p>
 <h4 id="components">Components</h4>
 <p><strong>Control plane (intake, task queue, orchestrator).</strong> It turns an approved work item into an agent task with a requester, an action ID from the agent action policy (template: D6), a budget and a sandbox, then runs the task as a sequence of steps. Microsoft first: in GitHub, every Copilot Coding Agent (CCA) PR in dotnet/runtime starts at a maintainer&#39;s request, and &quot;CCA cannot open PRs on its own&quot; [MS8]. Microsoft Digital&#39;s DevOps Assistant uses an Orchestrator Agent in Copilot Studio to route user requests to specialist agents, on the stated principle of inheriting existing ADO permissions [MS14] (an Inside Track post); it is the closest Microsoft analogue, not a task queue. Frontier: Stripe&#39;s blueprints interleave deterministic nodes (lint, push) with agent nodes (implement, fix CI) [STRIPE1]. Needed by II.1, II.5 and II.12, from Step 0, where readiness agents already run as tasks.</p>
 <p><strong>Execution sandboxes.</strong> Every agent task runs in a fresh environment with the repo&#39;s toolchain, no production access, no real customer data and limited egress (see II.5). Microsoft first: GitHub describes Copilot agents running in cloud sandboxes with an isolated working copy per task and enterprise managed settings [GH2] (product marketing). Microsoft&#39;s agent-security pilot used resettable Windows 365 Cloud PCs with Entra Agent IDs and network controls [MS18]. [GAP: no note describes GitHub Codespaces or Microsoft Dev Box as an agent sandbox.] Frontier: Stripe&#39;s devboxes are ready in about 10 seconds and isolated from production and the internet, so agents run without permission prompts [STRIPE1]. Needed by II.5, II.7 and II.12, from Step 0.</p>
@@ -3493,8 +3361,6 @@ flowchart TD
 </tr>
 </tbody></table>
 <p>Three items have no Microsoft product in our sources and are build work: the model gateway, the merge queue with risk score, and the trust ledger. The tool gateway is build work on Microsoft identity.</p>
-<figure class="excalidraw" data-diagram="V.2-reference-architecture"><img src="diagrams/V.2-reference-architecture.svg" alt="V.2 Component map"><figcaption>Figure: V.2 Component map</figcaption></figure>
-
 <h4 id="how-the-pieces-fit">How the pieces fit</h4>
 <ul>
 <li><strong>Agents never touch the core directly.</strong> <strong>Recommendation:</strong> every model call goes through the model gateway and every tool call through the tool gateway, both under an agent identity. No agent has a write path into a gate, the queue or ring promotion, so a misled or prompt-injected agent can produce a bad change but cannot wave it through.</li>

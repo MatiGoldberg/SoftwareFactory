@@ -35,7 +35,18 @@ make build        # or ./build.sh, or npm install && npm run build
 What it does (`tools/build-pdf.mjs`):
 
 1. Assembles `document/sections/*.md` in document order: Part 0, I, II.1 to II.12 (under a Part II heading), III, IV, V.1 and V.2 (under a Part V heading), VI, VII, then Appendices A, B (`document/references.md`), C, D (with D1 placed before D2) and E. Per-section "Open gaps" lists are dropped because Appendix C collects them, matching the Claude Doc. The order lives in the `ORDER` list at the top of the script.
-2. Renders each `document/diagrams/*.excalidraw` to SVG and places it as a figure at the end of its subsection (the `FIGURES` list: uber chart in 0.4, II.2, II.9, III.4, V.1, V.2).
-3. Renders every Mermaid block, adds a cover page (build date and commit) and a table of contents, and prints an A4 PDF with page numbers and PDF bookmarks.
+2. Picks one version of each diagram (see "Choosing the diagram source" below). In the default mode it renders the Excalidraw files to SVG, splitting multi-panel files into their panels, and puts each panel where its Mermaid twin was.
+3. Renders the remaining Mermaid blocks, adds a cover page (build date and commit) and a table of contents, and prints an A4 PDF with page numbers and PDF bookmarks.
+
+### Choosing the diagram source
+
+Twelve of the 37 diagrams exist twice: as a Mermaid block in a section and as a hand-drawn Excalidraw panel in `document/diagrams/`. The build includes exactly one version of each:
+
+| Mode | Command | What goes in the PDF |
+|---|---|---|
+| `excalidraw` (default) | `make build` | The 11 Excalidraw figures (0.4 uber chart, II.2 ×2, II.9 ×2, III ×2, V.1 ×3, V.2) replace their 12 Mermaid twins (the uber chart covers both 0.4 charts); the other 25 diagrams stay Mermaid. |
+| `mermaid` | `make build DIAGRAMS=mermaid` | All 37 diagrams from Mermaid; no Excalidraw. |
+
+The same flag works as `./build.sh --diagrams=mermaid`, `npm run build -- --diagrams=mermaid` or the `DIAGRAMS` environment variable. The pairing of Excalidraw panels to Mermaid blocks, including the crop box for each panel, is the `FIGURES` list in `tools/build-pdf.mjs`. If you add a Mermaid block before an existing one in those six sections, update the block numbers there; the build fails if a listed block no longer exists.
 
 The build fails if a Mermaid block does not render, a figure anchor is missing, or an image fails to load. To publish a revision: edit the section files, run `make build`, and commit `published/` with your changes.
