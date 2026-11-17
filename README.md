@@ -33,7 +33,7 @@ make help                      # all options
 
 The same options work on the script directly: `node tools/build-pdf.mjs --diagrams mermaid` (or `-d mermaid`, `--diagrams=mermaid`), `./build.sh -d mermaid`, or `npm run build -- --diagrams=mermaid`. Note the extra `--` with npm: without it npm keeps the option for itself, and the build stops with an error that says so.
 
-**Prerequisites:** Node.js 18 or later and npm. The first `make build` runs `npm install` and `npx playwright install chromium`; after that the build runs offline in about 10 seconds. To use a Chromium you already have, set `CHROMIUM_PATH=/path/to/chromium`.
+**Prerequisites:** Node.js 18 or later and npm. The first `make build` runs `npm install` and `npx playwright install chromium`; after that the build runs offline in about 15 seconds. To use a Chromium you already have, set `CHROMIUM_PATH=/path/to/chromium`.
 
 ### Options
 
