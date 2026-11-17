@@ -39,7 +39,7 @@ Key metrics: time from task start to merge, P95 time to land, verified-main lag,
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** the queue, the risk model and the verified-main pointer stay deterministic; one agent finds and repairs conflicts between parallel changes, another explains a risk score and drafts ways to lower it, neither approves a change, edits a score or sets a threshold; a change lands only when the deterministic gates pass.
+> **Takeaway:** **Recommendation, in one line:** the queue, the risk model and the verified-main pointer stay deterministic; one agent finds and repairs conflicts between parallel changes, another explains a risk score and drafts ways to lower it, neither approves a change, edits a score or sets a threshold; a change lands only when the deterministic gates pass.
 
 The risk model is ML, like Gandalf (see II.9), but it is a gate, not an agent: versioned, measured, with thresholds set by policy owners.
 

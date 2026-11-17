@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Software Factory logo">
+  <!-- Software Factory mark: a gear around a factory with a code chevron.
+       Replace this file (assets/logo.svg) to change the cover logo. -->
+  <path d="M85.4,23.4 L88.5,8.7 L111.5,8.7 L114.6,23.4 L133.2,29.4 L144.3,19.4 L163.0,32.9 L156.9,46.6 L168.4,62.4 L183.2,60.8 L190.4,82.8 L177.4,90.2 L177.4,109.8 L190.4,117.2 L183.2,139.2 L168.4,137.6 L156.9,153.4 L163.0,167.1 L144.3,180.6 L133.2,170.6 L114.6,176.6 L111.5,191.3 L88.5,191.3 L85.4,176.6 L66.8,170.6 L55.7,180.6 L37.0,167.1 L43.1,153.4 L31.6,137.6 L16.8,139.2 L9.6,117.2 L22.6,109.8 L22.6,90.2 L9.6,82.8 L16.8,60.8 L31.6,62.4 L43.1,46.6 L37.0,32.9 L55.7,19.4 L66.8,29.4 Z" fill="#E8710A"/>
+  <circle cx="100" cy="100" r="66" fill="#0B2D5B"/>
+  <!-- factory: sawtooth roof, chimney, floor -->
+  <path d="M52,136 L52,98 L72,84 L72,98 L92,84 L92,98 L112,84 L112,98 L124,90 L124,62 L138,62 L138,136 Z" fill="#FFFFFF"/>
+  <rect x="60" y="108" width="12" height="12" rx="1.5" fill="#0B2D5B"/>
+  <rect x="80" y="108" width="12" height="12" rx="1.5" fill="#0B2D5B"/>
+  <!-- code chevron in the window bay -->
+  <path d="M104,106 L113,114 L104,122" fill="none" stroke="#E8710A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M118,124 L128,124" stroke="#E8710A" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- smoke -->
+  <circle cx="131" cy="52" r="4" fill="#FFFFFF" opacity="0.85"/>
+  <circle cx="139" cy="44" r="3" fill="#FFFFFF" opacity="0.6"/>
+</svg>

@@ -76,7 +76,7 @@ The published answer is to derive facts, not declare them, and to make stale ent
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** only providers and merged PRs write the catalog; agents keep it current by proposing diffs with every change and triaging drift, and a stale entry lowers every agent's autonomy on that service.
+> **Takeaway:** **Recommendation, in one line:** only providers and merged PRs write the catalog; agents keep it current by proposing diffs with every change and triaging drift, and a stale entry lowers every agent's autonomy on that service.
 
 The reconciler and CI validation are deterministic. Owners approve ownership and classification changes; allowed-action changes also need governance, and no agent edits its own allowed actions (see D6). Realistic ceiling today is Act on approval (L2).
 

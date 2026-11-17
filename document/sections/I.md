@@ -10,7 +10,7 @@ Google's migration report says "The bottleneck in the process was the speed at w
 
 *Caveat:* Microsoft publishes no method for its 10 to 20% figure, and no source compares defect or revert rates of AI-reviewed against human-only-reviewed PRs (see II.6).
 
-So for an existing service: plan review and merge capacity before agent volume, and measure time through to merge, not PRs opened (see II.6, II.8, IV.8).
+> **Takeaway:** So for an existing service: plan review and merge capacity before agent volume, and measure time through to merge, not PRs opened (see II.6, II.8, IV.8).
 
 **2. The harness matters more than the model, and it must be re-tested when the model changes.**
 
@@ -18,7 +18,7 @@ The harness is everything around the model: instructions, tools, sandbox, verifi
 
 *Caveat:* harness parts age. Spotify's LLM judge vetoed about 25% of sessions while "We have yet to invest in evals for our judge." [SPOT4], and was later removed as too rigid [SPOT7] (an InfoQ report of a talk).
 
-So for an existing service: version the harness like code, and treat a model change as a new version of every agent action, which re-runs its evaluation set (see III.2, II.5).
+> **Takeaway:** So for an existing service: version the harness like code, and treat a model change as a new version of every agent action, which re-runs its evaluation set (see III.2, II.5).
 
 **3. Standardize the platform, not the tools.**
 
@@ -26,7 +26,7 @@ Microsoft Digital (Microsoft's internal IT organization) built compliance into p
 
 *Caveat:* the Shopify and Uber platform evidence comes from an interview, a conference talk and a partly paywalled newsletter.
 
-So for an existing service: put one gateway, one verification service and one agent identity model under whatever tools teams use (see V.2, IV.3).
+> **Takeaway:** So for an existing service: put one gateway, one verification service and one agent identity model under whatever tools teams use (see V.2, IV.3).
 
 **4. Start with toil and with work that is easy to verify.**
 
@@ -34,7 +34,7 @@ Microsoft's Inside Track blog reports that Microsoft Digital started with low-ri
 
 *Caveat:* easy-to-verify work still games its verifier: "A test PR could pass CI by weakening an existing test." [AIE6], and Spotify's early agents commented out failing tests [SPOT7].
 
-So for an existing service: pilot on test backfill or a pending migration, with a deterministic test-only diff check (see VI.2, II.7, II.12).
+> **Takeaway:** So for an existing service: pilot on test backfill or a pending migration, with a deterministic test-only diff check (see VI.2, II.7, II.12).
 
 **5. Context is infrastructure.**
 
@@ -42,7 +42,7 @@ Microsoft Digital's service catalog links services to repos, subscriptions and o
 
 *Caveat:* no source measures catalog accuracy or its effect on agent outcomes (see V.1).
 
-So for an existing service: the service catalog, AGENTS.md and the dependency graph are deliverables of Step 0, the readiness step that opens the roadmap (see III.4), kept as code with CI checks (see V.1; templates: D2, D3).
+> **Takeaway:** So for an existing service: the service catalog, AGENTS.md and the dependency graph are deliverables of Step 0, the readiness step that opens the roadmap (see III.4), kept as code with CI checks (see V.1; templates: D2, D3).
 
 **6. Autonomy is granted per action, on track record.**
 
@@ -50,7 +50,7 @@ Every Copilot Coding Agent PR in dotnet/runtime is opened at a maintainer's expl
 
 *Caveat:* the per-action ladder rests on one talk and a product announcement [AIE4, MS10], and no source publishes promotion thresholds (see III.2). Shopify's head of engineering said in an interview that it does not yet let AI check in code automatically [SHOP1].
 
-So for an existing service: record human-only baselines per task class, then promote one action one rung at a time, from Advise up to Act, then notify (see III.1), on evidence in a trust ledger, the per-action record of outcomes (see III.2; templates: D6, D7). No agent ever approves its own output.
+> **Takeaway:** So for an existing service: record human-only baselines per task class, then promote one action one rung at a time, from Advise up to Act, then notify (see III.1), on evidence in a trust ledger, the per-action record of outcomes (see III.2; templates: D6, D7). No agent ever approves its own output.
 
 **7. Safe deployment is the backstop that makes speed affordable.**
 
@@ -58,7 +58,7 @@ Azure moves all code and configuration through canary, pilot and regional stages
 
 *Caveat:* this evidence predates agents, and no source shows an agent halting or rolling back a ring (see II.9). Rings bound blast radius, but Spotify names a PR that passes CI yet is functionally wrong as the most serious agent failure [SPOT4], and a ring only catches it if a health signal moves.
 
-So for an existing service: rings, bake and a deterministic automatic halt are a Step 0 prerequisite; no agent change merges before they exist (see II.9, III.4).
+> **Takeaway:** So for an existing service: rings, bake and a deterministic automatic halt are a Step 0 prerequisite; no agent change merges before they exist (see II.9, III.4).
 
 **8. AI amplifies the organization you already have.**
 
@@ -66,7 +66,7 @@ Microsoft's Inside Track blog reports that Microsoft Digital adopted AI without 
 
 *Caveat:* most productivity figures are self-reported, and Anthropic's authors flag the bias in their own survey [AN4].
 
-So for an existing service: fix flaky builds, weak rollback and unclear ownership first, and judge progress by DORA delivery metrics plus factory metrics such as revert rate and cost per accepted change, against the service's own baseline (see VI.1, VI.4).
+> **Takeaway:** So for an existing service: fix flaky builds, weak rollback and unclear ownership first, and judge progress by DORA delivery metrics plus factory metrics such as revert rate and cost per accepted change, against the service's own baseline (see VI.1, VI.4).
 
 **Taken together:** lessons 1, 5 and 7 say what to build first (verification, context, safe deployment); lessons 3 and 8 say where to build it (the shared platform and the existing organization); lessons 2, 4 and 6 say how to let agents in (a versioned harness, small verifiable work and per-action trust). Parts II to VI follow that order.
 

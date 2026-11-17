@@ -70,7 +70,7 @@ The trust ledger is the per-action record that promotes or demotes an action (te
 
 ### III.4 The roadmap
 
-**Recommendation, in one line:** on Monday, pick one service and one team, record human-only baselines and fill the readiness checklist (D8); turn on the first agent only after that, and promote each action one rung at a time on ledger evidence.
+> **Takeaway:** **Recommendation, in one line:** on Monday, pick one service and one team, record human-only baselines and fill the readiness checklist (D8); turn on the first agent only after that, and promote each action one rung at a time on ledger evidence.
 
 **Recommendation:** agentify in nine steps, each of which uses what the previous ones built. Readiness and verifiers come first, because gaps humans tolerate, such as flaky builds, become hard constraints for agents [AIE8] (one conference talk), and AI is a "mirror and a multiplier" of its organization [GOOG3]. DORA's capabilities model names the foundations: AI-accessible internal data, strong version control with practiced rollback, small batches and quality internal platforms [GOOG4].
 

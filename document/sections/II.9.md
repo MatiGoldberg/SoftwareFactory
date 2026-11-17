@@ -43,7 +43,7 @@ Other references: Google compares canary against control and also checks absolut
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** the pipeline halts, and rolls back where a policy says so, by itself; the agent investigates, picks the mitigation when no policy decides, and at higher rungs carries out reversible mitigations itself. It may halt a rollout but never promote one (a false halt costs hours, a false go costs customers).
+> **Takeaway:** **Recommendation, in one line:** the pipeline halts, and rolls back where a policy says so, by itself; the agent investigates, picks the mitigation when no policy decides, and at higher rungs carries out reversible mitigations itself. It may halt a rollout but never promote one (a false halt costs hours, a false go costs customers).
 
 The rings, bake policy and watchdog verdict stay deterministic. Gandalf-style analytics belong to that core: an automated, policy-enforced gate (ML-based, but not an agent). The watchdog only stops the rollout it blames. Choosing and running the mitigation, and handling alarms the watchdog does not attribute (during the 30-day watch, or from customer reports), is on-call work, and that is what the agent takes over, rung by rung. A second agent writes the rollout plan as an input.
 

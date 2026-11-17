@@ -43,7 +43,7 @@ Other references: Microsoft's RCACopilot classifies incidents into root-cause ca
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** agents cluster signals into themes, draft opportunity briefs and link to existing work; the dedupe keys, catalog routing and priority rule stay deterministic, and a human owner accepts every item. Start clustering and linking at Advise (L0) and the brief agent at Prepare (L1).
+> **Takeaway:** **Recommendation, in one line:** agents cluster signals into themes, draft opportunity briefs and link to existing work; the dedupe keys, catalog routing and priority rule stay deterministic, and a human owner accepts every item. Start clustering and linking at Advise (L0) and the brief agent at Prepare (L1).
 
 Shopify's head of engineering puts the line plainly: "You shouldn't abdicate the thinking." / "You should abdicate the toil." [SHOP1]. Applied to intake, choosing what to build is the thinking; reading a thousand feedback rows is the toil. **Recommendation:** measure intake agents by owner triage time saved, not by items filed, because every extra item spends the review capacity this stage exists to protect.
 

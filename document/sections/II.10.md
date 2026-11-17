@@ -37,7 +37,7 @@ Key metrics: criteria passed at first ship, SLO breaches per ramp, flag age at r
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** a validation-report agent turns telemetry into evidence against each acceptance criterion and a flag-cleanup agent removes flags once the window closes; neither decides that a feature succeeded. Realistic ceiling today: Act on approval (L2).
+> **Takeaway:** **Recommendation, in one line:** a validation-report agent turns telemetry into evidence against each acceptance criterion and a flag-cleanup agent removes flags once the window closes; neither decides that a feature succeeded. Realistic ceiling today: Act on approval (L2).
 
 The ramp, the SLO alarm and automatic flag-off, the pass/fail check and the PR gates stay deterministic. After an automatic flag-off, or an alarm no policy covers, investigating and choosing the next mitigation is the on-call/SRE agent's job in II.9, not repeated here.
 

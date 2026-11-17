@@ -34,7 +34,7 @@ Key metrics: time to first review, review rounds, revert rate, and time to merge
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** an AI reviewer gives every PR a first pass whose high-precision findings can block it, but no agent approves; the only exception, our proposal, is that the deterministic risk gate (see II.8) approves named low-risk change classes and notifies the owner.
+> **Takeaway:** **Recommendation, in one line:** an AI reviewer gives every PR a first pass whose high-precision findings can block it, but no agent approves; the only exception, our proposal, is that the deterministic risk gate (see II.8) approves named low-risk change classes and notifies the owner.
 
 Checks, owner resolution, the risk gate and branch policy stay deterministic.
 

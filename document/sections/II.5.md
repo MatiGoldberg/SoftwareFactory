@@ -43,7 +43,7 @@ Ten months of numbers:
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** the agent writes code and fixes its CI failures inside a sandbox and blueprint; selection, verifiers, the CI cap and the merge stay deterministic. For feature code the ceiling today is Act on approval: the agent opens the PR, and a human merge is the approval. Act, then notify applies only to allow-listed maintenance classes, where the deterministic gates, not the agent, approve the merge.
+> **Takeaway:** **Recommendation, in one line:** the agent writes code and fixes its CI failures inside a sandbox and blueprint; selection, verifiers, the CI cap and the merge stay deterministic. For feature code the ceiling today is Act on approval: the agent opens the PR, and a human merge is the approval. Act, then notify applies only to allow-listed maintenance classes, where the deterministic gates, not the agent, approve the merge.
 
 ```mermaid
 flowchart TD

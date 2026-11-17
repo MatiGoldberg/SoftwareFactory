@@ -39,7 +39,7 @@ No Microsoft source describes agent test generation; the nearest evidence is tha
 
 ### What to agentify, and how far
 
-**Recommendation, in one line:** agents write, repair and triage tests; gates, test protection and mutation score stay deterministic, today an owner approves every test PR, and no agent writes the tests that judge its own change (the evaluator role, see II.3). Today's realistic ceiling is Act on approval.
+> **Takeaway:** **Recommendation, in one line:** agents write, repair and triage tests; gates, test protection and mutation score stay deterministic, today an owner approves every test PR, and no agent writes the tests that judge its own change (the evaluator role, see II.3). Today's realistic ceiling is Act on approval.
 
 Agents "reliably skew positive" grading their own work, which is why Anthropic separates generator from evaluator [AN3]. GitHub's Copilot Applied Science team, by its own blog account, keeps a contract-test area only humans can change [GH1].
 
